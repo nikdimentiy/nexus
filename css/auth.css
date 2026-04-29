@@ -290,3 +290,39 @@
   .aw-logo-wrap { width: 54px; height: 54px; border-radius: 14px; }
   .aw-logo-wrap i { font-size: 22px; }
 }
+
+/* ══════════════════════════════════════════
+   HEADER AUTH BOX
+══════════════════════════════════════════ */
+
+#authBox {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-left: auto;
+  padding: 4px 0;
+}
+
+#authUser {
+  display: none;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+#btnSignOut {
+  background: none;
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  color: #f43f5e;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+#btnSignOut:hover {
+  background: rgba(244, 63, 94, 0.12);
+  border-color: rgba(244, 63, 94, 0.7);
+}

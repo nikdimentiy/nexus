@@ -134,14 +134,14 @@
 
         <div class="header-mini-widgets">
           <div class="mini-widget">
-            <div class="mini-widget-name mastery-color" onclick="window.location.href='mastery.html'" style="cursor: pointer;">MASTERY</div>
+            <div class="mini-widget-name mastery-color" onclick="window.location.href='mastery.html'">MASTERY</div>
             <div class="mini-widget-stat" id="mwMasteryStat">-- / -- RITUALS</div>
             <div class="mini-widget-bar-wrap">
               <div class="mini-widget-bar mastery-bar" id="mwMasteryBar" style="width:0%"></div>
             </div>
           </div>
           <div class="mini-widget">
-            <div class="mini-widget-name vanguard-color" onclick="window.location.href='vanguard.html'" style="cursor: pointer;">VANGUARD</div>
+            <div class="mini-widget-name vanguard-color" onclick="window.location.href='vanguard.html'">VANGUARD</div>
             <div class="mini-widget-stat" id="mwVanguardStat">-- / -- MISSIONS</div>
             <div class="mini-widget-bar-wrap">
               <div class="mini-widget-bar vanguard-bar" id="mwVanguardBar" style="width:0%"></div>
@@ -159,21 +159,10 @@
           </div>
         </div>
 
-        <div id="authBox" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-left:auto;padding:4px 0;">
-          <div id="authGuest" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <form id="loginForm" autocomplete="on" onsubmit="return false;" style="display:contents;">
-              <input id="authEmail" type="email" name="email" placeholder="Email" autocomplete="username email" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#f8fafc;border-radius:6px;padding:5px 10px;font-size:0.8rem;outline:none;width:160px;">
-              <input id="authPassword" type="password" name="password" placeholder="Password" autocomplete="current-password" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#f8fafc;border-radius:6px;padding:5px 10px;font-size:0.8rem;outline:none;width:130px;">
-              <button id="btnSignIn" type="submit" class="btn-signin-nexus">
-                <span class="btn-signin-glow"></span>
-                <i class="fa-solid fa-bolt" style="font-size:0.7rem;"></i>
-                <span>ACCESS</span>
-              </button>
-            </form>
-          </div>
-          <div id="authUser" style="display:none;gap:12px;align-items:center;flex-wrap:wrap;">
+        <div id="authBox">
+          <div id="authUser">
             <span id="greetingText" class="greeting-text"></span>
-            <button id="btnSignOut" style="background:none;border:1px solid rgba(244,63,94,0.35);color:#f43f5e;font-size:0.75rem;font-weight:600;padding:5px 12px;border-radius:6px;cursor:pointer;transition:background 0.2s,border-color 0.2s;">Sign Out</button>
+            <button id="btnSignOut">Sign Out</button>
           </div>
         </div>
 
@@ -329,14 +318,9 @@
           <span class="pulse-dot"></span>
           Systems Active · Secure Local Storage
         </div>
-        <div style="display:flex;align-items:center;gap:16px;">
+        <div class="footer-right">
           <div id="lastRefresh">LAST SYNC —</div>
-          <button id="wipeDataBtn" onclick="wipeAllData()"
-            style="background:none;border:1px solid rgba(244,63,94,0.35);color:#f43f5e;font-size:0.75rem;font-family:var(--font-body);font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;letter-spacing:0.04em;transition:background 0.2s,border-color 0.2s;"
-            onmouseover="this.style.background='rgba(244,63,94,0.12)';this.style.borderColor='rgba(244,63,94,0.7)'"
-            onmouseout="this.style.background='none';this.style.borderColor='rgba(244,63,94,0.35)'">
-            WIPE DATA
-          </button>
+          <button id="wipeDataBtn" onclick="wipeAllData()">WIPE DATA</button>
         </div>
       </footer>
     </div>

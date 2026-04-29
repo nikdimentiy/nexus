@@ -10,12 +10,8 @@ import {
   ensureCloudDefaults,
 } from './appwrite-sync.js'
 
-const emailEl    = document.getElementById('authEmail')
-const passEl     = document.getElementById('authPassword')
-const guestEl    = document.getElementById('authGuest')
-const userEl     = document.getElementById('authUser')
-const sessionEl  = document.getElementById('authSession')
-const greetEl    = document.getElementById('greetingText')
+const userEl  = document.getElementById('authUser')
+const greetEl = document.getElementById('greetingText')
 
 const overlay      = document.getElementById('authOverlay')
 const overlayEmail = document.getElementById('overlayEmail')
@@ -77,7 +73,6 @@ function stopSessionClock() {
   clearInterval(sessionTimer)
   sessionTimer = null
   sessionStart = null
-  if (sessionEl) sessionEl.textContent = ''
 }
 
 // ── sign-in handlers ─────────────────────────────────────────────────
@@ -121,42 +116,20 @@ async function doOverlaySignIn() {
   }
 }
 
-async function doHeaderSignIn() {
-  const btn = document.getElementById('btnSignIn')
-  const label = btn.querySelector('span:last-child')
-  const original = label.textContent
-  btn.disabled = true
-  label.textContent = '...'
-  try {
-    const { error } = await signIn(emailEl.value, passEl.value)
-    if (error) { alert(error.message); return }
-    try { await ensureCloudDefaults() } catch (_) {}
-    try { await bootstrapCloudToLocal() } catch (_) {}
-    location.reload()
-  } catch (err) {
-    alert(err.message || 'Sign in failed')
-  } finally {
-    btn.disabled = false
-    label.textContent = original
-  }
-}
-
 // ── auth state ───────────────────────────────────────────────────────
 
 async function refreshAuth() {
   const user = await getCurrentUser()
   if (user) {
     hideOverlay()
-    guestEl.style.display = 'none'
-    userEl.style.display  = 'flex'
+    userEl.style.display = 'flex'
     if (!sessionStart) {
       sessionStart = true
       animateGreeting(user)
     }
   } else {
     showOverlay()
-    guestEl.style.display = 'flex'
-    userEl.style.display  = 'none'
+    userEl.style.display = 'none'
     stopSessionClock()
   }
 }
@@ -166,13 +139,6 @@ async function refreshAuth() {
 overlayBtn.addEventListener('click', doOverlaySignIn)
 ;[overlayEmail, overlayPass].forEach(el => {
   el.addEventListener('keydown', e => { if (e.key === 'Enter') doOverlaySignIn() })
-})
-
-document.getElementById('btnSignIn').onclick = doHeaderSignIn
-;[emailEl, passEl].forEach(el => {
-  el.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && emailEl.value && passEl.value) doHeaderSignIn()
-  })
 })
 
 document.getElementById('btnSignOut').onclick = async () => {

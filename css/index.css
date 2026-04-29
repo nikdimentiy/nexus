@@ -432,8 +432,8 @@
         text-transform: uppercase;
         line-height: 1;
       }
-      .mini-widget-name.mastery-color  { color: var(--mastery); }
-      .mini-widget-name.vanguard-color { color: var(--vanguard); }
+      .mini-widget-name.mastery-color  { color: var(--mastery);  cursor: pointer; }
+      .mini-widget-name.vanguard-color { color: var(--vanguard); cursor: pointer; }
       .mini-widget-name.streak-color   { color: #f59e0b; }
       .mini-widget.streak-widget {
         background: linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(251,191,36,0.04) 100%);
@@ -1444,6 +1444,28 @@
         display: flex;
         align-items: center;
         gap: 10px;
+      }
+      .footer-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      #wipeDataBtn {
+        background: none;
+        border: 1px solid rgba(244, 63, 94, 0.35);
+        color: #f43f5e;
+        font-size: 0.75rem;
+        font-family: var(--font-body);
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        letter-spacing: 0.04em;
+        transition: background 0.2s, border-color 0.2s;
+      }
+      #wipeDataBtn:hover {
+        background: rgba(244, 63, 94, 0.12);
+        border-color: rgba(244, 63, 94, 0.7);
       }
       .pulse-dot {
         display: inline-block;
