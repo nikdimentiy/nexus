@@ -42,6 +42,14 @@ const client    = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID)
 const account   = new Account(client)
 const databases = new Databases(client)
 
+// ── SESSION CACHE ─────────────────────────────────────────────────────
+// Cached after first successful auth check; avoids account.get() on every save.
+let _cachedUserId = null
+
+// Maps localStorage key → Appwrite $id; populated by bootstrapCloudToLocal.
+// Eliminates the findDoc() lookup from every saveCloudKey call.
+const _docIdCache = new Map()
+
 // ── AUTH ─────────────────────────────────────────────────────────────
 
 export async function signIn(email, password) {
@@ -54,6 +62,8 @@ export async function signIn(email, password) {
 }
 
 export async function signOut() {
+  _cachedUserId = null
+  _docIdCache.clear()
   try { await account.deleteSession('current') } catch (_) {}
 }
 
@@ -64,20 +74,10 @@ export async function getCurrentUser() {
 // ── INTERNALS ─────────────────────────────────────────────────────────
 
 async function getUserId() {
+  if (_cachedUserId) return _cachedUserId
   const user = await getCurrentUser()
-  return user?.$id ?? null
-}
-
-/** Find a document for a given user + key pair (returns null if missing). */
-async function findDoc(userId, key) {
-  try {
-    const res = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
-      Query.equal('user_id', userId),
-      Query.equal('key', key),
-      Query.limit(1),
-    ])
-    return res.documents[0] ?? null
-  } catch { return null }
+  _cachedUserId = user?.$id ?? null
+  return _cachedUserId
 }
 
 /** Permissions for a document owned by userId. */
@@ -89,17 +89,34 @@ function ownerPerms(userId) {
   ]
 }
 
-/** Upsert a serialized value to cloud without touching local timestamps. */
+/**
+ * Upsert a document using the cached $id when available.
+ * Falls back to a full listDocuments lookup only on cache miss.
+ * 1 API call in the normal path (update); 1 API call on first write (create).
+ */
 async function _upsertDoc(userId, key, serialized) {
-  const existing = await findDoc(userId, key)
   const payload  = { user_id: userId, key, value: serialized }
-  if (existing) {
-    await databases.updateDocument(DATABASE_ID, COLLECTION_ID, existing.$id, payload)
-  } else {
-    await databases.createDocument(
+  const cachedId = _docIdCache.get(key)
+
+  if (cachedId) {
+    try {
+      await databases.updateDocument(DATABASE_ID, COLLECTION_ID, cachedId, payload)
+      return
+    } catch {
+      // Stale cache (document deleted remotely) — fall through to create
+      _docIdCache.delete(key)
+    }
+  }
+
+  // No cached id — create a new document and cache its id
+  try {
+    const doc = await databases.createDocument(
       DATABASE_ID, COLLECTION_ID, ID.unique(),
       payload, ownerPerms(userId)
     )
+    _docIdCache.set(key, doc.$id)
+  } catch (err) {
+    console.error('[nexus sync] createDocument failed for key:', key, err)
   }
 }
 
@@ -121,19 +138,27 @@ export async function ensureCloudDefaults() {
       Query.limit(100),
     ])
     existingKeys = new Set(res.documents.map(d => d.key))
-  } catch { return }
+    // Seed cache from whatever Appwrite returned
+    res.documents.forEach(d => _docIdCache.set(d.key, d.$id))
+  } catch (err) {
+    console.error('[nexus sync] ensureCloudDefaults fetch failed:', err)
+    return
+  }
 
   for (const key of _syncKeys) {
     if (existingKeys.has(key)) continue
     const local = localStorage.getItem(key)
     if (local === null) continue
     try {
-      await databases.createDocument(
+      const doc = await databases.createDocument(
         DATABASE_ID, COLLECTION_ID, ID.unique(),
         { user_id: userId, key, value: local },
         ownerPerms(userId)
       )
-    } catch (_) {}
+      _docIdCache.set(key, doc.$id)
+    } catch (err) {
+      console.error('[nexus sync] ensureCloudDefaults upload failed for key:', key, err)
+    }
   }
 }
 
@@ -142,6 +167,7 @@ export async function ensureCloudDefaults() {
  * Uses one batch query instead of one query per key.
  * Uses last-write-wins via Appwrite's $updatedAt vs a local timestamp.
  * If local data is newer (offline edits), pushes local to cloud instead.
+ * Populates _docIdCache so subsequent saves need zero extra lookups.
  */
 export async function bootstrapCloudToLocal() {
   const userId = await getUserId()
@@ -154,7 +180,16 @@ export async function bootstrapCloudToLocal() {
       Query.limit(100),
     ])
     cloudDocs = new Map(res.documents.map(d => [d.key, d]))
-  } catch { return }
+    // Populate doc-id cache so saveCloudKey skips findDoc lookups
+    res.documents.forEach(d => _docIdCache.set(d.key, d.$id))
+  } catch (err) {
+    console.error('[nexus sync] bootstrapCloudToLocal fetch failed:', err)
+    return
+  }
+
+  if (cloudDocs.size === 0) {
+    console.warn('[nexus sync] No cloud documents found for user. Is this a new account?')
+  }
 
   for (const key of _syncKeys) {
     try {
@@ -173,13 +208,16 @@ export async function bootstrapCloudToLocal() {
         localStorage.setItem(key, doc.value)
         localStorage.setItem(`${key}__ts`, cloudMs.toString())
       }
-    } catch (_) {}
+    } catch (err) {
+      console.error('[nexus sync] bootstrap failed for key:', key, err)
+    }
   }
 }
 
 /**
  * Persist a single key to cloud and update the local cache.
  * Writes to localStorage immediately (optimistic cache), then syncs to Appwrite.
+ * Uses cached userId and docId — typically 1 API call total.
  * @param {string} key   — localStorage key name
  * @param {any}    value — the parsed JS value (object / array)
  */
@@ -191,11 +229,16 @@ export async function saveCloudKey(key, value) {
   localStorage.setItem(`${key}__ts`, Date.now().toString())
 
   const userId = await getUserId()
-  if (!userId) return
+  if (!userId) {
+    console.warn('[nexus sync] saveCloudKey skipped — no authenticated user')
+    return
+  }
 
   try {
     await _upsertDoc(userId, key, serialized)
-  } catch (_) {}
+  } catch (err) {
+    console.error('[nexus sync] saveCloudKey failed for key:', key, err)
+  }
 }
 
 /**
@@ -225,11 +268,30 @@ export async function deleteCloudKey(key) {
   const userId = await getUserId()
   if (!userId) return
 
-  const existing = await findDoc(userId, key)
-  if (!existing) return
+  const docId = _docIdCache.get(key)
+  if (docId) {
+    try {
+      await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, docId)
+      _docIdCache.delete(key)
+      localStorage.removeItem(`${key}__ts`)
+      return
+    } catch {
+      _docIdCache.delete(key)
+    }
+  }
 
+  // Cache miss — fall back to a full lookup
   try {
-    await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, existing.$id)
+    const res = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+      Query.equal('user_id', userId),
+      Query.equal('key', key),
+      Query.limit(1),
+    ])
+    const doc = res.documents[0]
+    if (!doc) return
+    await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, doc.$id)
     localStorage.removeItem(`${key}__ts`)
-  } catch (_) {}
+  } catch (err) {
+    console.error('[nexus sync] deleteCloudKey failed for key:', key, err)
+  }
 }
