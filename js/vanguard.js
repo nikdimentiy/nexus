@@ -1208,7 +1208,7 @@
         }
 
         if (e.key === "?") { toggleShortcuts(); e.preventDefault(); }
-        if (e.key === "m" || e.key === "M") window.location.href = "Mastery.html";
+        if (e.key === "m" || e.key === "M") window.location.href = "mastery.html";
         if (e.key === "n" || e.key === "N") window.location.href = "index.html";
         if (e.key === "t" || e.key === "T") jumpToToday();
         if (e.key === "ArrowLeft")  shiftCycle(-1);

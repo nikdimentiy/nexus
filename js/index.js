@@ -478,7 +478,7 @@
           icon: "fa-solid fa-crown",
           color: "#fbbf24",
           rgb: "251,191,36",
-          file: "Mastery.html",
+          file: "mastery.html",
         };
         if (!m.hasData)
           return cardShell(opts, `<div class="no-data">Data Not Found — Launch hub to initialize.</div>`);
@@ -516,7 +516,7 @@
           icon: "fa-solid fa-shield-halved",
           color: "#c084fc",
           rgb: "192,132,252",
-          file: "Vanguard.html",
+          file: "vanguard.html",
         };
         if (!v.hasData)
           return cardShell(opts, `<div class="no-data">Data Not Found — Launch hub to initialize.</div>`);
@@ -993,7 +993,7 @@
       document.addEventListener("keydown", (e) => {
         const tag = document.activeElement?.tagName;
         if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-        if (e.key === "v" || e.key === "V") window.location.href = "Vanguard.html";
-        if (e.key === "m" || e.key === "M") window.location.href = "Mastery.html";
+        if (e.key === "v" || e.key === "V") window.location.href = "vanguard.html";
+        if (e.key === "m" || e.key === "M") window.location.href = "mastery.html";
 
       });

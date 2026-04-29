@@ -575,7 +575,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
         if (e.key === 'Escape') { document.getElementById('dayModal').classList.remove('active'); return; }
         const key = e.key.toLowerCase();
-        const navMap = { n: "index.html", v: "Vanguard.html" };
+        const navMap = { n: "index.html", v: "vanguard.html" };
         if (navMap[key]) { window.location.href = navMap[key]; return; }
         const energyMap = { l: "low", m: "medium", h: "high" };
         if (energyMap[key]) { const cur = saveEnergy(energyMap[key]); renderEnergyButtons(cur); return; }
