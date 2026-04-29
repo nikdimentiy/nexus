@@ -3,7 +3,6 @@
 ══════════════════════════════════════════════════════ */
 
       let saveCloudKey = () => Promise.resolve();
-      let deleteCloudKey = () => Promise.resolve();
 
       /* ── LIVE SYNC · BroadcastChannel ── */
       const _nexusSync = (() => {
@@ -16,15 +15,6 @@
         } catch { return { broadcast: () => {}, listen: () => {} }; }
       })();
 
-      /* ── DATA VAULT ── */
-      const VAULT_KEYS = {
-        mastery:         'mastery_data',
-        vanguard:        'vanguard-logs',
-        vanguardGoals:   'vanguard-cycle-goals',
-        ontrack:         'streak_ontrack',
-        tracking:        'streak_timeTracking',
-      };
-
       function showNexusToast(msg, isError = false) {
         const toast = document.getElementById('nexusToast');
         toast.textContent = msg;
@@ -36,79 +26,6 @@
         toast.classList.add('show');
         clearTimeout(toast._timer);
         toast._timer = setTimeout(() => toast.classList.remove('show'), 3000);
-      }
-
-      function updateVaultKeys() {
-        document.querySelectorAll('#vaultKeys .vault-key').forEach(el => {
-          const key = el.dataset.key;
-          el.classList.toggle('active', localStorage.getItem(key) !== null);
-        });
-      }
-
-      function exportAllData() {
-        const backup = {
-          _meta: {
-            version: '1.0',
-            exported: new Date().toISOString(),
-            source: 'NEXUS · DATA VAULT',
-          }
-        };
-        let count = 0;
-        for (const [name, key] of Object.entries(VAULT_KEYS)) {
-          const raw = localStorage.getItem(key);
-          if (raw !== null) {
-            try { backup[name] = JSON.parse(raw); }
-            catch { backup[name] = raw; }
-            count++;
-          }
-        }
-        if (count === 0) {
-          showNexusToast('✦ No data found to export', true);
-          return;
-        }
-        const json = JSON.stringify(backup, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const a    = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `nexus-backup-${new Date().toISOString().slice(0,10)}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(a.href);
-        showNexusToast(`✦ Backup exported · ${count} systems saved`);
-      }
-
-      function importAllData(file) {
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const backup = JSON.parse(e.target.result);
-            if (!backup || typeof backup !== 'object' || Array.isArray(backup))
-              throw new Error('bad format');
-            let count = 0;
-            for (const [name, key] of Object.entries(VAULT_KEYS)) {
-              if (Object.prototype.hasOwnProperty.call(backup, name)) {
-                localStorage.setItem(key, JSON.stringify(backup[name]));
-                saveCloudKey(key, backup[name]);
-                count++;
-              }
-            }
-            if (count === 0) throw new Error('no known keys');
-            updateVaultKeys();
-            showNexusToast(`✦ Restored ${count} system${count > 1 ? 's' : ''} · reloading…`);
-            setTimeout(() => location.reload(), 1400);
-          } catch {
-            showNexusToast('✦ Error: invalid or unrecognised backup file', true);
-          }
-        };
-        reader.readAsText(file);
-      }
-
-      function wipeAllData() {
-        if (!confirm("Wipe ALL Nexus data from local storage? This cannot be undone.")) return;
-        localStorage.clear();
-        Promise.all(Object.values(VAULT_KEYS).map(k => deleteCloudKey(k))).then(() => location.reload());
       }
 
       function todayKey() {
@@ -727,13 +644,11 @@
         try {
           const _mod = await import('./appwrite-sync.js');
           saveCloudKey = _mod.saveCloudKey;
-          deleteCloudKey = _mod.deleteCloudKey;
           await _mod.ensureCloudDefaults();
           await _mod.bootstrapCloudToLocal();
         } catch(e) {}
         renderAll();
         setInterval(renderAll, 60000);
-        updateVaultKeys();
       })();
 
       /* ══════════════════════════════════════════════════════

@@ -259,39 +259,3 @@ export function setupRealtime() {
     }
   )
 }
-
-/**
- * Remove a key from Appwrite (used by the data-vault wipe).
- * @param {string} key
- */
-export async function deleteCloudKey(key) {
-  const userId = await getUserId()
-  if (!userId) return
-
-  const docId = _docIdCache.get(key)
-  if (docId) {
-    try {
-      await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, docId)
-      _docIdCache.delete(key)
-      localStorage.removeItem(`${key}__ts`)
-      return
-    } catch {
-      _docIdCache.delete(key)
-    }
-  }
-
-  // Cache miss — fall back to a full lookup
-  try {
-    const res = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
-      Query.equal('user_id', userId),
-      Query.equal('key', key),
-      Query.limit(1),
-    ])
-    const doc = res.documents[0]
-    if (!doc) return
-    await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, doc.$id)
-    localStorage.removeItem(`${key}__ts`)
-  } catch (err) {
-    console.error('[nexus sync] deleteCloudKey failed for key:', key, err)
-  }
-}
