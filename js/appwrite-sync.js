@@ -24,14 +24,19 @@ const DATABASE_ID   = '69f1709d0024647f5655'
 const COLLECTION_ID = 'user_data'
 // ────────────────────────────────────────────────────────────────────
 
-/** All localStorage keys that are synced to the cloud. */
-const SYNC_KEYS = [
+// Dynamic key registry — add built-in keys here; modules call registerSyncKey() to opt in
+const _syncKeys = new Set([
   'mastery_data',
   'vanguard-logs',
   'vanguard-cycle-goals',
   'streak_ontrack',
   'streak_timeTracking',
-]
+])
+
+/** Register a localStorage key for cloud sync. Call once per module at init time. */
+export function registerSyncKey(key) {
+  _syncKeys.add(key)
+}
 
 const client    = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID)
 const account   = new Account(client)
@@ -84,71 +89,132 @@ function ownerPerms(userId) {
   ]
 }
 
+/** Upsert a serialized value to cloud without touching local timestamps. */
+async function _upsertDoc(userId, key, serialized) {
+  const existing = await findDoc(userId, key)
+  const payload  = { user_id: userId, key, value: serialized }
+  if (existing) {
+    await databases.updateDocument(DATABASE_ID, COLLECTION_ID, existing.$id, payload)
+  } else {
+    await databases.createDocument(
+      DATABASE_ID, COLLECTION_ID, ID.unique(),
+      payload, ownerPerms(userId)
+    )
+  }
+}
+
 // ── SYNC API ──────────────────────────────────────────────────────────
 
 /**
  * On first login, push any locally-stored data that doesn't yet exist
  * in the cloud. Cloud always wins if a document already exists.
+ * Uses one batch query instead of one query per key.
  */
 export async function ensureCloudDefaults() {
   const userId = await getUserId()
   if (!userId) return
 
-  for (const key of SYNC_KEYS) {
+  let existingKeys
+  try {
+    const res = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+      Query.equal('user_id', userId),
+      Query.limit(100),
+    ])
+    existingKeys = new Set(res.documents.map(d => d.key))
+  } catch { return }
+
+  for (const key of _syncKeys) {
+    if (existingKeys.has(key)) continue
+    const local = localStorage.getItem(key)
+    if (local === null) continue
     try {
-      const existing = await findDoc(userId, key)
-      if (!existing) {
-        const local = localStorage.getItem(key)
-        if (local !== null) {
-          await databases.createDocument(
-            DATABASE_ID, COLLECTION_ID, ID.unique(),
-            { user_id: userId, key, value: local },
-            ownerPerms(userId)
-          )
-        }
+      await databases.createDocument(
+        DATABASE_ID, COLLECTION_ID, ID.unique(),
+        { user_id: userId, key, value: local },
+        ownerPerms(userId)
+      )
+    } catch (_) {}
+  }
+}
+
+/**
+ * Download cloud values into localStorage (called on every page load).
+ * Uses one batch query instead of one query per key.
+ * Uses last-write-wins via Appwrite's $updatedAt vs a local timestamp.
+ * If local data is newer (offline edits), pushes local to cloud instead.
+ */
+export async function bootstrapCloudToLocal() {
+  const userId = await getUserId()
+  if (!userId) return
+
+  let cloudDocs
+  try {
+    const res = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+      Query.equal('user_id', userId),
+      Query.limit(100),
+    ])
+    cloudDocs = new Map(res.documents.map(d => [d.key, d]))
+  } catch { return }
+
+  for (const key of _syncKeys) {
+    try {
+      const doc = cloudDocs.get(key)
+      if (!doc) continue
+
+      const cloudMs  = new Date(doc.$updatedAt).getTime()
+      const localMs  = parseInt(localStorage.getItem(`${key}__ts`) ?? '0', 10)
+      const hasLocal = localStorage.getItem(key) !== null
+
+      if (hasLocal && localMs > cloudMs) {
+        // Local is newer (offline edit) — push to cloud, keep local as-is
+        await _upsertDoc(userId, key, localStorage.getItem(key))
+      } else {
+        // Cloud is authoritative — pull to local cache
+        localStorage.setItem(key, doc.value)
+        localStorage.setItem(`${key}__ts`, cloudMs.toString())
       }
     } catch (_) {}
   }
 }
 
 /**
- * Download all cloud values into localStorage.
- * Called once at page load after the user is authenticated.
- */
-export async function bootstrapCloudToLocal() {
-  const userId = await getUserId()
-  if (!userId) return
-
-  for (const key of SYNC_KEYS) {
-    try {
-      const doc = await findDoc(userId, key)
-      if (doc) localStorage.setItem(key, doc.value)
-    } catch (_) {}
-  }
-}
-
-/**
- * Persist a single key to Appwrite (upsert).
+ * Persist a single key to cloud and update the local cache.
+ * Writes to localStorage immediately (optimistic cache), then syncs to Appwrite.
  * @param {string} key   — localStorage key name
  * @param {any}    value — the parsed JS value (object / array)
  */
 export async function saveCloudKey(key, value) {
+  const serialized = JSON.stringify(value)
+
+  // Optimistic local write with write timestamp
+  localStorage.setItem(key, serialized)
+  localStorage.setItem(`${key}__ts`, Date.now().toString())
+
   const userId = await getUserId()
   if (!userId) return
 
-  const payload  = { user_id: userId, key, value: JSON.stringify(value) }
-  const existing = await findDoc(userId, key)
-
   try {
-    if (existing) {
-      await databases.updateDocument(DATABASE_ID, COLLECTION_ID, existing.$id, payload)
-    } else {
-      await databases.createDocument(
-        DATABASE_ID, COLLECTION_ID, ID.unique(),
-        payload, ownerPerms(userId)
-      )
-    }
+    await _upsertDoc(userId, key, serialized)
   } catch (_) {}
+}
+
+/**
+ * Subscribe to Appwrite Realtime for cross-device updates.
+ * On any write event, re-bootstraps local cache and broadcasts to other tabs.
+ * Returns the unsubscribe function.
+ */
+export function setupRealtime() {
+  return client.subscribe(
+    `databases.${DATABASE_ID}.collections.${COLLECTION_ID}.documents`,
+    async payload => {
+      const events  = payload.events ?? []
+      const isWrite = events.some(e => e.includes('.create') || e.includes('.update') || e.includes('.delete'))
+      if (!isWrite) return
+
+      await bootstrapCloudToLocal()
+      window._nexusSync?.broadcast('realtime')
+    }
+  )
 }
 
 /**
@@ -164,5 +230,6 @@ export async function deleteCloudKey(key) {
 
   try {
     await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, existing.$id)
+    localStorage.removeItem(`${key}__ts`)
   } catch (_) {}
 }
