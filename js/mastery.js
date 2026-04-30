@@ -24,22 +24,12 @@ const _calToday = new Date();
 let calViewYear  = _calToday.getFullYear();
 let calViewMonth = _calToday.getMonth();
 
-/* ── LIVE SYNC · BroadcastChannel ── */
-const _nexusSync = (() => {
-    try {
-        const ch = new BroadcastChannel('nexus-sync');
-        return {
-            broadcast: src => ch.postMessage({ type: 'storage-update', source: src }),
-            listen: cb => { ch.onmessage = e => { if (e.data?.type === 'storage-update') cb(); }; }
-        };
-    } catch { return { broadcast: () => {}, listen: () => {} }; }
-})();
+/* ── LIVE SYNC · BroadcastChannel (shared global from storage.js) ── */
+const _nexusSync = window._nexusSync;
+/* ── todayKey from storage.js ── */
+const todayKey = window.todayKey;
 
 /* ── HELPERS ── */
-function todayKey() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
 function loadData() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
     catch { return {}; }
@@ -392,7 +382,10 @@ function openDayModal(year, month, day) {
         ${!isToday && !isPast ? '<div class="modal-tip">Future date. Complete today\'s rituals and they will be recorded here.</div>' : ''}
     `;
 
-    document.getElementById('dayModal').classList.add('active');
+    const modal = document.getElementById('dayModal');
+    modal.classList.add('active');
+    const _releaseTrap = window.trapFocus(modal);
+    modal._releaseTrap = _releaseTrap;
     setTimeout(() => {
         const fill = document.querySelector('#dModalBody .stat-bar-fill');
         if (fill) fill.style.width = fill.getAttribute('data-target') + '%';
@@ -573,7 +566,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.addEventListener("keydown", (e) => {
         const tag = document.activeElement?.tagName;
         if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-        if (e.key === 'Escape') { document.getElementById('dayModal').classList.remove('active'); return; }
+        if (e.key === 'Escape') { const m = document.getElementById('dayModal'); m.classList.remove('active'); m._releaseTrap?.(); return; }
         const key = e.key.toLowerCase();
         const navMap = { n: "index.html", v: "vanguard.html" };
         if (navMap[key]) { window.location.href = navMap[key]; return; }
@@ -597,7 +590,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('calPrev').addEventListener('click', () => { calViewMonth--; if (calViewMonth < 0) { calViewMonth = 11; calViewYear--; } buildBrickWall(); });
     document.getElementById('calNext').addEventListener('click', () => { calViewMonth++; if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; } buildBrickWall(); });
 
-    document.getElementById('dayModalClose').addEventListener('click', () => document.getElementById('dayModal').classList.remove('active'));
-    document.getElementById('dayModal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('active'); });
+    function closeModal() {
+        const modal = document.getElementById('dayModal');
+        modal.classList.remove('active');
+        modal._releaseTrap?.();
+    }
+    document.getElementById('dayModalClose').addEventListener('click', closeModal);
+    document.getElementById('dayModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 
 });

@@ -11,7 +11,7 @@ NEXUS is designed around three connected systems: the main command hub, the dail
 ## 🧩 Core Modules
 
 ### 🏠 NEXUS Hub
-The main dashboard acts as the central control layer with sign-in, day timers, countdowns, weekly panels, readiness status, and system-wide data vault controls. It unifies key mission systems like Mastery, Vanguard, Goals, OnTrack, and Tracking into one operational view.
+The main dashboard acts as the central control layer with sign-in, day timers, countdowns, weekly panels, readiness status, and system-wide controls. It unifies key mission systems like Mastery, Vanguard, Goals, OnTrack, and Tracking into one operational view.
 
 ### 🎯 Mastery
 Mastery is the daily ritual engine focused on consistent self-development through repeatable habits and measurable streaks. It tracks metrics like current streak, best streak, total logged days, perfect days, 7-day average, mastery score, and ritual completion progress.
@@ -25,7 +25,6 @@ Vanguard is the strategic intelligence layer built for cycle review, forecasting
 - 🔐 Authentication-protected experience powered by Appwrite  
 - 📊 Weekly planning, tracking, and on-track progress panels  
 - 📈 Readiness overview with system health indicators and score visualization  
-- 🗂️ Data Vault with export and restore backup controls across mission systems  
 - 🔥 Streak tracking, perfect days, and ritual completion analytics  
 - 🧠 Energy-level tracking for daily context and performance correlation  
 - 🤖 AI-assisted forecasting and cycle analytics for strategic decision-making  
@@ -70,10 +69,6 @@ Mastery tracks 8 core rituals that shape daily consistency and personal growth:
 ## 🛠️ Tech Direction
 
 The project uses a modular frontend structure with separate pages for the hub, mastery, and vanguard systems, each loading dedicated JavaScript and CSS assets. The interface integrates Font Awesome icons, Google Fonts, local storage/data export flows, and Appwrite-backed authentication protection.
-
-## 💾 Data Vault
-
-NEXUS includes a built-in vault system for unified backups across mission data sources including Mastery, Vanguard logs, goals, OnTrack, and time tracking. Users can export a full backup or restore from a JSON file directly inside the interface.
 
 ## 🚀 Vision
 

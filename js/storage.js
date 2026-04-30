@@ -15,6 +15,39 @@ window.todayKey = function todayKey() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+/** Escape HTML special chars to prevent XSS when injecting user text into innerHTML. */
+window.escapeHtml = function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+/**
+ * Trap keyboard focus inside a modal element.
+ * Focuses the first focusable child on call and returns a cleanup function.
+ */
+window.trapFocus = function trapFocus(modalEl) {
+  const sel = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  const getFocusable = () => Array.from(modalEl.querySelectorAll(sel)).filter(el => !el.disabled)
+  const first = getFocusable()[0]
+  first?.focus()
+  function handler(e) {
+    if (e.key !== 'Tab') return
+    const focusable = getFocusable()
+    const last = focusable[focusable.length - 1]
+    if (e.shiftKey) {
+      if (document.activeElement === focusable[0]) { e.preventDefault(); last?.focus() }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); focusable[0]?.focus() }
+    }
+  }
+  modalEl.addEventListener('keydown', handler)
+  return () => modalEl.removeEventListener('keydown', handler)
+}
+
 /** Cross-tab sync via BroadcastChannel. */
 window._nexusSync = (() => {
   try {

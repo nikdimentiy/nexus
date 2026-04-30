@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <meta name="theme-color" content="#1A1A1A">
     <title>Daily Mastery · Rolls-Royce Edition</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/mastery.css">
     <link rel="prefetch" href="vanguard.html">
@@ -229,9 +229,9 @@
 
 <div class="toast" id="toast"></div>
 
-<div class="modal-overlay" id="dayModal">
+<div class="modal-overlay" id="dayModal" role="dialog" aria-modal="true" aria-labelledby="dModalTitle">
     <div class="modal-box">
-        <button class="modal-close" id="dayModalClose"><i class="fas fa-times"></i></button>
+        <button class="modal-close" id="dayModalClose" aria-label="Close"><i class="fas fa-times"></i></button>
         <div class="modal-header">
             <div class="modal-icon"><i class="fas fa-calendar-day"></i></div>
             <div>

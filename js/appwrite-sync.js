@@ -55,12 +55,32 @@ const _docIdCache = new Map()
 
 // ── TOAST ──────────────────────────────────────────────────────────────
 
-function _showToast(msg, durationMs = 4000) {
+function _showToast(msg, durationMs = 4000, isError = false) {
   const el = document.getElementById('nexusToast')
   if (!el) return
   el.textContent = msg
+  if (isError) {
+    el.style.borderColor = 'rgba(244,63,94,0.5)'
+    el.style.color       = '#f87171'
+    el.style.boxShadow   = '0 0 24px rgba(244,63,94,0.18), 0 8px 32px rgba(0,0,0,0.4)'
+  } else {
+    el.style.borderColor = ''
+    el.style.color       = ''
+    el.style.boxShadow   = ''
+  }
   el.classList.add('show')
-  setTimeout(() => el.classList.remove('show'), durationMs)
+  clearTimeout(el._timer)
+  el._timer = setTimeout(() => el.classList.remove('show'), durationMs)
+}
+
+/** Wrap a promise with a timeout. Rejects with an Error on timeout. */
+function _withTimeout(promise, ms = 12000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Request timed out')), ms)
+    ),
+  ])
 }
 
 // ── AUTH ─────────────────────────────────────────────────────────────
@@ -138,7 +158,7 @@ async function _upsertDoc(userId, key, serialized) {
 
   if (cachedId) {
     try {
-      await databases.updateDocument(DATABASE_ID, COLLECTION_ID, cachedId, payload)
+      await _withTimeout(databases.updateDocument(DATABASE_ID, COLLECTION_ID, cachedId, payload))
       return
     } catch {
       // Stale cache (document deleted remotely) — fall through to create
@@ -148,13 +168,14 @@ async function _upsertDoc(userId, key, serialized) {
 
   // No cached id — create a new document and cache its id
   try {
-    const doc = await databases.createDocument(
+    const doc = await _withTimeout(databases.createDocument(
       DATABASE_ID, COLLECTION_ID, ID.unique(),
       payload, ownerPerms(userId)
-    )
+    ))
     _docIdCache.set(key, doc.$id)
   } catch (err) {
     console.error('[nexus sync] createDocument failed for key:', key, err)
+    throw err
   }
 }
 
@@ -214,6 +235,7 @@ export async function bootstrapCloudToLocal() {
     docs.forEach(d => _docIdCache.set(d.key, d.$id))
   } catch (err) {
     console.error('[nexus sync] bootstrapCloudToLocal fetch failed:', err)
+    _showToast('Could not reach cloud — showing local data.', 5000, true)
     return
   }
 
@@ -276,6 +298,7 @@ export async function saveCloudKey(key, value) {
     await _upsertDoc(userId, key, serialized)
   } catch (err) {
     console.error('[nexus sync] saveCloudKey failed for key:', key, err)
+    _showToast('Cloud sync failed — data saved locally only.', 5000, true)
   }
 }
 

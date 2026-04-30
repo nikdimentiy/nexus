@@ -79,16 +79,8 @@
       const dispDay = document.getElementById("disp-day");
       const dispPct = document.getElementById("disp-pct");
 
-      /* ── LIVE SYNC · BroadcastChannel ── */
-      const _nexusSync = (() => {
-        try {
-          const ch = new BroadcastChannel('nexus-sync');
-          return {
-            broadcast: src => ch.postMessage({ type: 'storage-update', source: src }),
-            listen:    cb  => { ch.onmessage = e => { if (e.data?.type === 'storage-update') cb(); }; }
-          };
-        } catch { return { broadcast: () => {}, listen: () => {} }; }
-      })();
+      /* ── LIVE SYNC · BroadcastChannel (shared global from storage.js) ── */
+      const _nexusSync = window._nexusSync;
 
       // ─── UTILS ───
       function saveToLocal() {
@@ -613,9 +605,15 @@
 
         document.getElementById("modal-body-content").innerHTML = html;
         modal.classList.add("active");
+        modal._releaseTrap = window.trapFocus(modal);
       }
 
-      function closeDetailModal() { document.getElementById("stats-modal").classList.remove("active"); currentModalExportData = null; }
+      function closeDetailModal() {
+        const modal = document.getElementById("stats-modal");
+        modal.classList.remove("active");
+        modal._releaseTrap?.();
+        currentModalExportData = null;
+      }
       function exportModalCSV() {
         if (!currentModalExportData) return;
         const { title, dateRange, stats, days } = currentModalExportData;
@@ -797,7 +795,7 @@
           <div class="csc-goal-row">
             <div class="csc-goal-label"><i class="fa-solid fa-bullseye"></i> Cycle Goal</div>
             ${goalText
-              ? `<div class="csc-goal-text">"${goalText}"</div>`
+              ? `<div class="csc-goal-text">"${escapeHtml(goalText)}"</div>`
               : `<div class="csc-goal-empty">No goal was set for this cycle</div>`}
           </div>
           <div class="csc-stat">
@@ -1014,8 +1012,9 @@
           noteCharCount.classList.toggle("warn", noteVal.length > 170);
           const energy = logs[dateStr]?.energy || null;
           ["low","medium","high"].forEach(lvl => {
-            document.getElementById(`btn-energy-${lvl}`).className =
-              `energy-btn${energy === lvl ? ` active-${lvl}` : ""}`;
+            const btn = document.getElementById(`btn-energy-${lvl}`);
+            btn.className = `energy-btn${energy === lvl ? ` active-${lvl}` : ""}`;
+            btn.setAttribute("aria-pressed", energy === lvl ? "true" : "false");
           });
           inpDeepFocus.value = logs[dateStr]?.deepFocus || "";
           const isEarly = !!logs[dateStr]?.earlyWake;
@@ -1189,12 +1188,20 @@
       const btnShowShortcuts = document.getElementById("btn-show-shortcuts");
       const btnCloseShortcuts = document.getElementById("btn-close-shortcuts");
 
+      function openShortcuts() {
+        shortcutsModal.classList.add("active");
+        shortcutsModal._releaseTrap = window.trapFocus(shortcutsModal);
+      }
+      function closeShortcuts() {
+        shortcutsModal.classList.remove("active");
+        shortcutsModal._releaseTrap?.();
+      }
       function toggleShortcuts() {
-        shortcutsModal.classList.toggle("active");
+        shortcutsModal.classList.contains("active") ? closeShortcuts() : openShortcuts();
       }
       btnShowShortcuts.addEventListener("click", toggleShortcuts);
-      btnCloseShortcuts.addEventListener("click", () => shortcutsModal.classList.remove("active"));
-      shortcutsModal.addEventListener("click", () => shortcutsModal.classList.remove("active"));
+      btnCloseShortcuts.addEventListener("click", closeShortcuts);
+      shortcutsModal.addEventListener("click", e => { if (e.target === shortcutsModal) closeShortcuts(); });
 
       document.addEventListener("keydown", (e) => {
         const tag = document.activeElement?.tagName;
@@ -1202,9 +1209,8 @@
 
         // Close modals on Esc
         if (e.key === "Escape") {
-          shortcutsModal.classList.remove("active");
-          const statsModal = document.getElementById("stats-modal");
-          if (statsModal) statsModal.classList.remove("active");
+          closeShortcuts();
+          closeDetailModal();
         }
 
         if (e.key === "?") { toggleShortcuts(); e.preventDefault(); }

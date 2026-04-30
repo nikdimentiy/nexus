@@ -4,16 +4,8 @@
 
       let saveCloudKey = () => Promise.resolve();
 
-      /* ── LIVE SYNC · BroadcastChannel ── */
-      const _nexusSync = (() => {
-        try {
-          const ch = new BroadcastChannel('nexus-sync');
-          return {
-            broadcast: src => ch.postMessage({ type: 'storage-update', source: src }),
-            listen:    cb  => { ch.onmessage = e => { if (e.data?.type === 'storage-update') cb(); }; }
-          };
-        } catch { return { broadcast: () => {}, listen: () => {} }; }
-      })();
+      /* ── LIVE SYNC · BroadcastChannel (shared global from storage.js) ── */
+      const _nexusSync = window._nexusSync;
 
       function showNexusToast(msg, isError = false) {
         const toast = document.getElementById('nexusToast');
@@ -28,18 +20,9 @@
         toast._timer = setTimeout(() => toast.classList.remove('show'), 3000);
       }
 
-      function todayKey() {
-        const d = new Date();
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      }
-
-      function safeJSON(key, fallback = null) {
-        try {
-          return JSON.parse(localStorage.getItem(key)) ?? fallback;
-        } catch {
-          return fallback;
-        }
-      }
+      /* ── todayKey + safeJSON from storage.js ── */
+      const todayKey = window.todayKey;
+      const safeJSON = window.safeJSON;
 
       function updateClock() {
         const now = new Date();
@@ -879,7 +862,11 @@
 
         for (let i = 0; i < NODE_COUNT; i++) nodes.push(new Node());
 
+        let _rafId = null;
+        let _paused = false;
+
         function frame() {
+          if (_paused) return;
           ctx.clearRect(0, 0, W, H);
           nodes.forEach((n) => {
             n.update();
@@ -900,8 +887,19 @@
               }
             }
           }
-          requestAnimationFrame(frame);
+          _rafId = requestAnimationFrame(frame);
         }
+
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) {
+            _paused = true;
+            cancelAnimationFrame(_rafId);
+          } else {
+            _paused = false;
+            frame();
+          }
+        });
+
         frame();
       })();
 
