@@ -1,0 +1,19 @@
+{
+  "name": "nexus",
+  "version": "1.0.0",
+  "description": "NEXUS — unified personal command hub",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint js/",
+    "format": "prettier --write \"**/*.{js,html,css}\""
+  },
+  "devDependencies": {
+    "vite": "^5.4.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0"
+  }
+}

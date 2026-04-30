@@ -1,5 +1,5 @@
 /**
- * auth.js — Nexus auth overlay logic (index.html only)
+ * auth.js — Nexus auth widget logic (index.html only)
  * Loaded as <script type="module" src="js/auth.js">
  */
 
@@ -20,9 +20,14 @@ const overlayBtn   = document.getElementById('overlaySignIn')
 const overlayErr   = document.getElementById('authOverlayError')
 
 let sessionStart = null
-let sessionTimer = null
 
-// ── overlay helpers ──────────────────────────────────────────────────
+// Rate-limiting: lock out after MAX_ATTEMPTS failures for LOCKOUT_MS
+const MAX_ATTEMPTS = 5
+const LOCKOUT_MS   = 60_000  // 60 s
+let failCount      = 0
+let lockedUntil    = 0
+
+// overlay helpers
 
 function showOverlayError(msg) {
   overlayErr.textContent = msg
@@ -43,41 +48,38 @@ function showOverlay() {
   clearOverlayError()
 }
 
-// ── greeting animation ───────────────────────────────────────────────
+function setLockout() {
+  lockedUntil = Date.now() + LOCKOUT_MS
+  overlayBtn.disabled = true
+  const label = overlayBtn.querySelector('span')
+
+  const tick = () => {
+    const remaining = Math.ceil((lockedUntil - Date.now()) / 1000)
+    if (remaining <= 0) {
+      failCount = 0
+      overlayBtn.disabled = false
+      label.textContent = 'Sign In'
+      clearOverlayError()
+      return
+    }
+    showOverlayError(`Too many attempts — try again in ${remaining}s`)
+    label.textContent = `Wait ${remaining}s`
+    setTimeout(tick, 1000)
+  }
+  tick()
+}
+
+// greeting
 
 function animateGreeting(user) {
-  const text = user.email || 'Thank you for coming!'
-  greetEl.innerHTML = ''
-  text.split('').forEach((ch, i) => {
-    const s = document.createElement('span')
-    s.className = 'g-char'
-    s.textContent = ch === ' ' ? ' ' : ch
-    s.style.animationDelay = `${i * 55}ms`
-    greetEl.appendChild(s)
-  })
+  greetEl.textContent = user.email || 'Thank you for coming!'
 }
 
-// ── session clock ────────────────────────────────────────────────────
-
-function formatDuration(ms) {
-  const s = Math.floor(ms / 1000)
-  const h = Math.floor(s / 3600)
-  const m = Math.floor((s % 3600) / 60)
-  const sec = s % 60
-  return h > 0
-    ? `${h}h ${String(m).padStart(2,'0')}m ${String(sec).padStart(2,'0')}s`
-    : `${String(m).padStart(2,'0')}m ${String(sec).padStart(2,'0')}s`
-}
-
-function stopSessionClock() {
-  clearInterval(sessionTimer)
-  sessionTimer = null
-  sessionStart = null
-}
-
-// ── sign-in handlers ─────────────────────────────────────────────────
+// sign-in handler
 
 async function doOverlaySignIn() {
+  if (Date.now() < lockedUntil) return
+
   clearOverlayError()
   const email = overlayEmail.value.trim()
   const pass  = overlayPass.value
@@ -92,31 +94,47 @@ async function doOverlaySignIn() {
     const { error } = await signIn(email, pass)
     if (error) {
       console.error('[NEXUS AUTH] Sign-in error:', error)
+      failCount++
+      if (failCount >= MAX_ATTEMPTS) {
+        overlayBtn.classList.remove('loading')
+        setLockout()
+        return
+      }
       const isNetwork = !navigator.onLine || (error.code === 0) ||
         (typeof error.message === 'string' && /fetch|network|failed/i.test(error.message))
+      const attemptsLeft = MAX_ATTEMPTS - failCount
+      const suffix = attemptsLeft === 1 ? ' (1 attempt left)' : ` (${attemptsLeft} attempts left)`
       const msg = isNetwork
         ? 'Cannot reach server. If opening via file://, use a local HTTP server instead.'
-        : error.message || error.type || `Error ${error.code}` || 'Authentication failed.'
+        : (error.message || error.type || `Error ${error.code}` || 'Authentication failed.') + suffix
       showOverlayError(msg)
       return
     }
+    failCount = 0
     try { await ensureCloudDefaults() } catch (_) {}
     try { await bootstrapCloudToLocal() } catch (_) {}
     location.reload()
   } catch (err) {
     console.error('[NEXUS AUTH] Unexpected error:', err)
+    failCount++
+    if (failCount >= MAX_ATTEMPTS) {
+      overlayBtn.classList.remove('loading')
+      setLockout()
+      return
+    }
     const isFileProtocol = location.protocol === 'file:'
     showOverlayError(isFileProtocol
       ? 'Open via HTTP server, not file://. Run: python3 -m http.server 8080'
       : err.message || 'Authentication failed.')
   } finally {
+    if (Date.now() < lockedUntil) return
     overlayBtn.disabled = false
     overlayBtn.classList.remove('loading')
     label.textContent = 'Sign In'
   }
 }
 
-// ── auth state ───────────────────────────────────────────────────────
+// auth state
 
 async function refreshAuth() {
   const user = await getCurrentUser()
@@ -130,11 +148,11 @@ async function refreshAuth() {
   } else {
     showOverlay()
     userEl.style.display = 'none'
-    stopSessionClock()
+    sessionStart = null
   }
 }
 
-// ── event wiring ─────────────────────────────────────────────────────
+// event wiring
 
 overlayBtn.addEventListener('click', doOverlaySignIn)
 ;[overlayEmail, overlayPass].forEach(el => {

@@ -1,8 +1,12 @@
-const CACHE = 'nexus-v1'
+// Bump CACHE_VERSION after every deploy so stale assets are evicted automatically.
+// Format: YYYYMMDD or a short git SHA injected by CI.
+const CACHE_VERSION = '20260430'
+const CACHE = `nexus-${CACHE_VERSION}`
 
 const STATIC = [
   './',
   './index.html',
+  './offline.html',
   './vanguard.html',
   './mastery.html',
   './css/index.css',
@@ -10,6 +14,7 @@ const STATIC = [
   './css/mastery.css',
   './css/auth.css',
   './js/storage.js',
+  './js/config.js',
   './js/appwrite-sync.js',
   './js/auth-guard.js',
   './js/auth.js',
@@ -19,8 +24,12 @@ const STATIC = [
 ]
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)))
-  self.skipWaiting()
+  // skipWaiting inside waitUntil so activation waits for caching to finish
+  e.waitUntil(
+    caches.open(CACHE)
+      .then(c => c.addAll(STATIC))
+      .then(() => self.skipWaiting())
+  )
 })
 
 self.addEventListener('activate', e => {
@@ -37,6 +46,11 @@ self.addEventListener('fetch', e => {
   if (!e.request.url.startsWith(self.registration.scope)) return
 
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    caches.match(e.request).then(cached => {
+      if (cached) return cached
+      return fetch(e.request).catch(() =>
+        caches.match('./offline.html')
+      )
+    })
   )
 })

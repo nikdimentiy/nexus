@@ -2,8 +2,8 @@
  * Appwrite cloud sync — replaces supabase-sync.js
  *
  * SETUP (one-time, in Appwrite console):
- *  1. Create a project → paste its ID into PROJECT_ID
- *  2. Create a database → paste its ID into DATABASE_ID
+ *  1. Create a project → paste its ID into js/config.js (see config.example.js)
+ *  2. Create a database → paste its ID into js/config.js
  *  3. Inside that database create a collection named "user_data" with:
  *       user_id : String(36),    required
  *       key     : String(64),    required
@@ -16,12 +16,15 @@
 
 import { Client, Account, Databases, Query, Permission, Role, ID }
   from 'https://cdn.jsdelivr.net/npm/appwrite@16/dist/esm/sdk.js'
+import { APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID, APPWRITE_DATABASE_ID }
+  from './config.js'
 
 // ── CONFIGURATION ───────────────────────────────────────────────────
-const ENDPOINT      = 'https://sfo.cloud.appwrite.io/v1'
-const PROJECT_ID    = '69f16dab00258a313360'
-const DATABASE_ID   = '69f1709d0024647f5655'
+const ENDPOINT      = APPWRITE_ENDPOINT
+const PROJECT_ID    = APPWRITE_PROJECT_ID
+const DATABASE_ID   = APPWRITE_DATABASE_ID
 const COLLECTION_ID = 'user_data'
+const PAGE_SIZE     = 100  // Appwrite max per request
 // ────────────────────────────────────────────────────────────────────
 
 // Dynamic key registry — add built-in keys here; modules call registerSyncKey() to opt in
@@ -49,6 +52,16 @@ let _cachedUserId = null
 // Maps localStorage key → Appwrite $id; populated by bootstrapCloudToLocal.
 // Eliminates the findDoc() lookup from every saveCloudKey call.
 const _docIdCache = new Map()
+
+// ── TOAST ──────────────────────────────────────────────────────────────
+
+function _showToast(msg, durationMs = 4000) {
+  const el = document.getElementById('nexusToast')
+  if (!el) return
+  el.textContent = msg
+  el.classList.add('show')
+  setTimeout(() => el.classList.remove('show'), durationMs)
+}
 
 // ── AUTH ─────────────────────────────────────────────────────────────
 
@@ -90,6 +103,31 @@ function ownerPerms(userId) {
 }
 
 /**
+ * Fetch ALL documents for a user via cursor-based pagination.
+ * Appwrite caps each page at PAGE_SIZE (100); this loops until exhausted.
+ */
+async function _fetchAllDocs(userId) {
+  const all = []
+  let cursor = null
+
+  while (true) {
+    const filters = [
+      Query.equal('user_id', userId),
+      Query.limit(PAGE_SIZE),
+    ]
+    if (cursor) filters.push(Query.cursorAfter(cursor))
+
+    const res = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, filters)
+    all.push(...res.documents)
+
+    if (res.documents.length < PAGE_SIZE) break  // last page
+    cursor = res.documents[res.documents.length - 1].$id
+  }
+
+  return all
+}
+
+/**
  * Upsert a document using the cached $id when available.
  * Falls back to a full listDocuments lookup only on cache miss.
  * 1 API call in the normal path (update); 1 API call on first write (create).
@@ -125,7 +163,7 @@ async function _upsertDoc(userId, key, serialized) {
 /**
  * On first login, push any locally-stored data that doesn't yet exist
  * in the cloud. Cloud always wins if a document already exists.
- * Uses one batch query instead of one query per key.
+ * Paginates through all documents to avoid the 100-doc cap.
  */
 export async function ensureCloudDefaults() {
   const userId = await getUserId()
@@ -133,13 +171,9 @@ export async function ensureCloudDefaults() {
 
   let existingKeys
   try {
-    const res = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
-      Query.equal('user_id', userId),
-      Query.limit(100),
-    ])
-    existingKeys = new Set(res.documents.map(d => d.key))
-    // Seed cache from whatever Appwrite returned
-    res.documents.forEach(d => _docIdCache.set(d.key, d.$id))
+    const docs = await _fetchAllDocs(userId)
+    existingKeys = new Set(docs.map(d => d.key))
+    docs.forEach(d => _docIdCache.set(d.key, d.$id))
   } catch (err) {
     console.error('[nexus sync] ensureCloudDefaults fetch failed:', err)
     return
@@ -164,9 +198,9 @@ export async function ensureCloudDefaults() {
 
 /**
  * Download cloud values into localStorage (called on every page load).
- * Uses one batch query instead of one query per key.
+ * Paginates through all documents to avoid the 100-doc cap.
  * Uses last-write-wins via Appwrite's $updatedAt vs a local timestamp.
- * If local data is newer (offline edits), pushes local to cloud instead.
+ * If local data is newer (offline edits), pushes local to cloud and shows a toast.
  * Populates _docIdCache so subsequent saves need zero extra lookups.
  */
 export async function bootstrapCloudToLocal() {
@@ -175,13 +209,9 @@ export async function bootstrapCloudToLocal() {
 
   let cloudDocs
   try {
-    const res = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
-      Query.equal('user_id', userId),
-      Query.limit(100),
-    ])
-    cloudDocs = new Map(res.documents.map(d => [d.key, d]))
-    // Populate doc-id cache so saveCloudKey skips findDoc lookups
-    res.documents.forEach(d => _docIdCache.set(d.key, d.$id))
+    const docs = await _fetchAllDocs(userId)
+    cloudDocs = new Map(docs.map(d => [d.key, d]))
+    docs.forEach(d => _docIdCache.set(d.key, d.$id))
   } catch (err) {
     console.error('[nexus sync] bootstrapCloudToLocal fetch failed:', err)
     return
@@ -190,6 +220,8 @@ export async function bootstrapCloudToLocal() {
   if (cloudDocs.size === 0) {
     console.warn('[nexus sync] No cloud documents found for user. Is this a new account?')
   }
+
+  let conflictCount = 0
 
   for (const key of _syncKeys) {
     try {
@@ -203,6 +235,7 @@ export async function bootstrapCloudToLocal() {
       if (hasLocal && localMs > cloudMs) {
         // Local is newer (offline edit) — push to cloud, keep local as-is
         await _upsertDoc(userId, key, localStorage.getItem(key))
+        conflictCount++
       } else {
         // Cloud is authoritative — pull to local cache
         localStorage.setItem(key, doc.value)
@@ -211,6 +244,11 @@ export async function bootstrapCloudToLocal() {
     } catch (err) {
       console.error('[nexus sync] bootstrap failed for key:', key, err)
     }
+  }
+
+  if (conflictCount > 0) {
+    const label = conflictCount === 1 ? '1 key' : `${conflictCount} keys`
+    _showToast(`Sync conflict resolved — your offline changes (${label}) were pushed to cloud.`)
   }
 }
 
@@ -259,3 +297,19 @@ export function setupRealtime() {
     }
   )
 }
+
+// ── ONLINE RECOVERY ───────────────────────────────────────────────────
+// Trigger a full sync whenever the device reconnects after being offline.
+
+window.addEventListener('online', async () => {
+  const userId = await getUserId()
+  if (!userId) return
+  console.info('[nexus sync] Network restored — re-syncing…')
+  try {
+    await bootstrapCloudToLocal()
+    window._nexusSync?.broadcast('online-sync')
+    _showToast('Back online — data synced.', 3000)
+  } catch (err) {
+    console.error('[nexus sync] Online recovery sync failed:', err)
+  }
+})

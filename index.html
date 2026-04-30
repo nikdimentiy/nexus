@@ -4,12 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0f172a" />
+    <meta name="description" content="NEXUS — your unified personal command hub for tracking missions, mastery, streaks, and time." />
+    <meta property="og:title" content="NEXUS · COMMAND HUB" />
+    <meta property="og:description" content="Unified personal command hub for missions, mastery, and time tracking." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="favicon/apple-touch-icon.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="NEXUS · COMMAND HUB" />
+    <meta name="twitter:description" content="Unified personal command hub for missions, mastery, and time tracking." />
     <link rel="icon" type="image/x-icon" href="favicon/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png" />
     <link rel="manifest" href="favicon/site.webmanifest" />
     <title>NEXUS · COMMAND HUB</title>
+    <!-- Preload key font stylesheet to unblock render -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" as="style" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
       rel="stylesheet"
@@ -28,11 +38,8 @@
   </head>
   <body>
 
-    <!-- ══ AUTH OVERLAY ══ -->
+    <!-- ══ AUTH WIDGET ══ -->
     <div id="authOverlay">
-      <div class="aw-glow aw-glow-top"></div>
-      <div class="aw-glow aw-glow-bottom"></div>
-
       <div class="aw-card">
         <div class="aw-logo-wrap">
           <i class="fa-solid fa-layer-group"></i>
@@ -282,7 +289,7 @@
       <footer class="nexus-footer">
         <div class="footer-left">
           <span class="pulse-dot"></span>
-          Systems Active · Secure Local Storage
+          Systems Active · Synced via Appwrite Cloud
         </div>
         <div id="lastRefresh">LAST SYNC —</div>
       </footer>

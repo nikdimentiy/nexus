@@ -1,0 +1,13 @@
+# Real Appwrite credentials — use js/config.example.js as a template
+js/config.js
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+
+# Node (if a build step is added later)
+node_modules/
+dist/
+.env
+.env.local
