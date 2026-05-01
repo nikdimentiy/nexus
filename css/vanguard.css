@@ -397,19 +397,10 @@ body {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;       /* center children horizontally */
-  padding: 28px 24px;
+  padding: 24px 28px;
   gap: 18px;
   overflow-y: auto;
   overflow-x: hidden;
-}
-
-/* Every direct child is full-width up to a readable max — this is the
-   centering constraint that prevents content from sprawling on wide screens */
-.main-content > * {
-  width: 100%;
-  max-width: 1200px;
-  flex-shrink: 0;
 }
 
 .topbar { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; gap: 20px; }
@@ -949,7 +940,7 @@ body.theme-dark .nexus-btn::after { background: linear-gradient(90deg, transpare
   .app-layout { flex-direction: column; height: auto; min-height: 100vh; overflow: visible; }
   .sidebar { width: 100%; min-width: 100%; border-right: none; border-bottom: 1px solid var(--border-1); overflow: visible; height: auto; }
   .sidebar.collapsed { display: none; margin-left: 0; }
-  .main-content { overflow: visible; padding: 18px 16px; height: auto; min-height: 0; flex: none; gap: 16px; align-items: stretch; }
+  .main-content { overflow: visible; padding: 18px 16px; height: auto; min-height: 0; flex: none; gap: 16px; }
   .topbar { flex-direction: column; align-items: flex-start; gap: 14px; }
   .topbar > div:last-child { flex-wrap: wrap; gap: 8px; }
   .cycle-info { width: 100%; }
@@ -964,7 +955,7 @@ body.theme-dark .nexus-btn::after { background: linear-gradient(90deg, transpare
    RESPONSIVE — MOBILE  (≤ 600px)
    ════════════════════════════════════════════ */
 @media (max-width: 600px) {
-  .main-content { padding: 14px 12px; gap: 14px; align-items: stretch; }
+  .main-content { padding: 14px 12px; gap: 14px; }
   .eff-grid  { grid-template-columns: 1fr; }
   .si-grid-4 { grid-template-columns: 1fr 1fr; }
   .si-grid-7 { grid-template-columns: repeat(4, 1fr); }
@@ -986,7 +977,7 @@ body.theme-dark .nexus-btn::after { background: linear-gradient(90deg, transpare
   .widget-label, .widget-sub { font-size: 10px; }
   .control-group label { font-size: 11px; }
   .control-group input, .btn-toggle { padding: 11px 12px; font-size: 14px; min-height: 46px; }
-  .main-content { padding: 12px 10px; align-items: stretch; }
+  .main-content { padding: 12px 10px; }
   .si-grid-7 { grid-template-columns: repeat(4, 1fr); }
   .nexus-btn { bottom: 20px; right: 16px; padding: 11px 20px; font-size: 0.75rem; border-radius: 12px; }
   .kbd-th-category { display: none; }
