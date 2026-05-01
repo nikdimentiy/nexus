@@ -15,7 +15,7 @@
  */
 
 import { Client, Account, Databases, Query, Permission, Role, ID }
-  from 'https://cdn.jsdelivr.net/npm/appwrite@16/dist/esm/sdk.js'
+  from 'appwrite'
 import { APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID, APPWRITE_DATABASE_ID }
   from './config.js'
 
@@ -27,7 +27,9 @@ const COLLECTION_ID = 'user_data'
 const PAGE_SIZE     = 100  // Appwrite max per request
 // ────────────────────────────────────────────────────────────────────
 
-// Dynamic key registry — add built-in keys here; modules call registerSyncKey() to opt in
+// All localStorage keys that are synced to Appwrite. Declare every key here —
+// do NOT add keys from view modules at runtime. syncOnLogin() runs before any
+// view is imported, so dynamically-registered keys would be missed on first load.
 const _syncKeys = new Set([
   'mastery_data',
   'vanguard-logs',
@@ -35,11 +37,6 @@ const _syncKeys = new Set([
   'streak_ontrack',
   'streak_timeTracking',
 ])
-
-/** Register a localStorage key for cloud sync. Call once per module at init time. */
-export function registerSyncKey(key) {
-  _syncKeys.add(key)
-}
 
 const client    = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID)
 const account   = new Account(client)
@@ -137,7 +134,7 @@ async function _fetchAllDocs(userId) {
     ]
     if (cursor) filters.push(Query.cursorAfter(cursor))
 
-    const res = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, filters)
+    const res = await _withTimeout(databases.listDocuments(DATABASE_ID, COLLECTION_ID, filters))
     all.push(...res.documents)
 
     if (res.documents.length < PAGE_SIZE) break  // last page
@@ -275,6 +272,76 @@ export async function bootstrapCloudToLocal() {
 }
 
 /**
+ * Single-pass sync called immediately after sign-in.
+ * Replaces calling ensureCloudDefaults() + bootstrapCloudToLocal() in sequence —
+ * both previously did a full _fetchAllDocs(), so sign-in was 2× the API calls.
+ *
+ * One fetch, then for each registered key:
+ *   - Not in cloud + local exists  → create in cloud  (ensureCloudDefaults behaviour)
+ *   - In cloud, local is newer     → push local up     (offline-edit conflict resolution)
+ *   - In cloud, cloud is newer     → pull to local     (normal bootstrap)
+ */
+export async function syncOnLogin() {
+  const userId = await getUserId()
+  if (!userId) return
+
+  let docs
+  try {
+    docs = await _fetchAllDocs(userId)
+  } catch (err) {
+    console.error('[nexus sync] syncOnLogin fetch failed:', err)
+    _showToast('Could not reach cloud — showing local data.', 5000, true)
+    return
+  }
+
+  const cloudDocs = new Map(docs.map(d => [d.key, d]))
+  docs.forEach(d => _docIdCache.set(d.key, d.$id))
+
+  if (cloudDocs.size === 0) {
+    console.warn('[nexus sync] No cloud documents found. New account?')
+  }
+
+  let conflictCount = 0
+
+  for (const key of _syncKeys) {
+    try {
+      const doc   = cloudDocs.get(key)
+      const local = localStorage.getItem(key)
+
+      if (!doc) {
+        if (local !== null) {
+          const newDoc = await databases.createDocument(
+            DATABASE_ID, COLLECTION_ID, ID.unique(),
+            { user_id: userId, key, value: local },
+            ownerPerms(userId)
+          )
+          _docIdCache.set(key, newDoc.$id)
+        }
+        continue
+      }
+
+      const cloudMs = new Date(doc.$updatedAt).getTime()
+      const localMs = parseInt(localStorage.getItem(`${key}__ts`) ?? '0', 10)
+
+      if (local !== null && localMs > cloudMs) {
+        await _upsertDoc(userId, key, local)
+        conflictCount++
+      } else {
+        localStorage.setItem(key, doc.value)
+        localStorage.setItem(`${key}__ts`, cloudMs.toString())
+      }
+    } catch (err) {
+      console.error('[nexus sync] syncOnLogin failed for key:', key, err)
+    }
+  }
+
+  if (conflictCount > 0) {
+    const label = conflictCount === 1 ? '1 key' : `${conflictCount} keys`
+    _showToast(`Sync conflict resolved — your offline changes (${label}) were pushed to cloud.`)
+  }
+}
+
+/**
  * Persist a single key to cloud and update the local cache.
  * Writes to localStorage immediately (optimistic cache), then syncs to Appwrite.
  * Uses cached userId and docId — typically 1 API call total.
@@ -304,18 +371,41 @@ export async function saveCloudKey(key, value) {
 
 /**
  * Subscribe to Appwrite Realtime for cross-device updates.
- * On any write event, re-bootstraps local cache and broadcasts to other tabs.
+ * Applies only the single changed document to localStorage instead of
+ * re-downloading all documents on every event.
  * Returns the unsubscribe function.
  */
 export function setupRealtime() {
   return client.subscribe(
     `databases.${DATABASE_ID}.collections.${COLLECTION_ID}.documents`,
     async payload => {
-      const events  = payload.events ?? []
-      const isWrite = events.some(e => e.includes('.create') || e.includes('.update') || e.includes('.delete'))
-      if (!isWrite) return
+      const events   = payload.events ?? []
+      const isCreate = events.some(e => e.includes('.create'))
+      const isUpdate = events.some(e => e.includes('.update'))
+      const isDelete = events.some(e => e.includes('.delete'))
+      if (!isCreate && !isUpdate && !isDelete) return
 
-      await bootstrapCloudToLocal()
+      const doc    = payload.payload
+      const userId = _cachedUserId ?? await getUserId()
+
+      // Ignore events that don't belong to this user or lack a key field
+      if (!doc?.key || !userId || doc.user_id !== userId) return
+
+      if (isDelete) {
+        localStorage.removeItem(doc.key)
+        localStorage.removeItem(`${doc.key}__ts`)
+        _docIdCache.delete(doc.key)
+      } else {
+        // Only apply if the incoming version is not older than what we have locally
+        const cloudMs = new Date(doc.$updatedAt).getTime()
+        const localMs = parseInt(localStorage.getItem(`${doc.key}__ts`) ?? '0', 10)
+        if (cloudMs >= localMs) {
+          localStorage.setItem(doc.key, doc.value)
+          localStorage.setItem(`${doc.key}__ts`, cloudMs.toString())
+          _docIdCache.set(doc.key, doc.$id)
+        }
+      }
+
       window._nexusSync?.broadcast('realtime')
     }
   )

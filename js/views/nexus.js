@@ -190,7 +190,8 @@ export async function init(container, user) {
   document.getElementById('mwVanguardLink').addEventListener('click', () => { location.hash = 'vanguard' })
 
   // Sign out
-  document.getElementById('btnSignOut').onclick = () => window._nexusSignOut?.()
+  document.getElementById('btnSignOut').onclick = () =>
+    document.dispatchEvent(new CustomEvent('nexus:signout'))
 
   // Show greeting
   if (user) {

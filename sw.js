@@ -1,24 +1,11 @@
-// Bump CACHE_VERSION after every deploy so stale assets are evicted automatically.
-// Format: YYYYMMDD or a short git SHA injected by CI.
-const CACHE_VERSION = '20260430'
+// CACHE_VERSION is replaced at build time by the Vite swBuildDate plugin.
+// In dev it stays as the literal string; in production dist/sw.js gets the actual date.
+const CACHE_VERSION = '__BUILD_DATE__'
 const CACHE = `nexus-${CACHE_VERSION}`
 
-const STATIC = [
-  './',
-  './index.html',
-  './offline.html',
-  './css/index.css',
-  './css/vanguard.css',
-  './css/mastery.css',
-  './css/auth.css',
-  './js/storage.js',
-  './js/config.js',
-  './js/appwrite-sync.js',
-  './js/router.js',
-  './js/views/nexus.js',
-  './js/views/vanguard.js',
-  './js/views/mastery.js',
-]
+// Replaced at build time by the Vite swBuildDate plugin with all hashed output assets.
+// In dev the fallback list is used (SW caching is not relied on in dev).
+const STATIC = '__PRECACHE_ASSETS__'
 
 self.addEventListener('install', e => {
   // skipWaiting inside waitUntil so activation waits for caching to finish

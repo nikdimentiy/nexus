@@ -12,8 +12,7 @@
 import {
   signIn, signOut,
   getCurrentUser,
-  bootstrapCloudToLocal,
-  ensureCloudDefaults,
+  syncOnLogin,
   setupRealtime,
 } from './appwrite-sync.js'
 
@@ -114,8 +113,7 @@ async function doOverlaySignIn() {
       return
     }
     failCount = 0
-    try { await ensureCloudDefaults() }  catch (_) {}
-    try { await bootstrapCloudToLocal() } catch (_) {}
+    try { await syncOnLogin() } catch (_) {}
 
     // Update in-memory user and wire realtime, then navigate
     _user = await getCurrentUser()
@@ -144,15 +142,17 @@ overlayBtn.addEventListener('click', doOverlaySignIn)
 })
 
 // Sign-out is wired from within nexus view (button is rendered there)
-window._nexusSignOut = async () => {
+// Sign-out is triggered by a 'nexus:signout' CustomEvent dispatched from the
+// Nexus view's sign-out button. Using an event keeps the auth boundary inside
+// the router and prevents any arbitrary script from calling sign-out directly.
+document.addEventListener('nexus:signout', async () => {
   _realtimeUnsub?.()
   _realtimeUnsub = null
   await signOut()
   _user = null
   showOverlay()
-  // Re-render nexus (which will show sign-in state)
   await _renderView('')
-}
+})
 
 // ── Realtime subscription ─────────────────────────────────────────────────────
 function _wireRealtime() {
@@ -175,7 +175,7 @@ async function _renderView(hash) {
   const resolvedHash = ROUTES[hash] ? hash : ''
 
   // Destroy previous view
-  try { _destroyCurrent?.() } catch (_) {}
+  try { _destroyCurrent?.() } catch (err) { console.error('[router] view destroy failed:', err) }
   _destroyCurrent = null
 
   activateCSS(resolvedHash === '' ? 'nexus' : resolvedHash)
