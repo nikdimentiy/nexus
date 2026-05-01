@@ -11,10 +11,8 @@ export default defineConfig({
     // Inject the build date into sw.js so the cache name auto-bumps on deploy
     rollupOptions: {
       input: {
-        main:     'index.html',
-        vanguard: 'vanguard.html',
-        mastery:  'mastery.html',
-        offline:  'offline.html',
+        main:    'index.html',
+        offline: 'offline.html',
       },
     },
   },

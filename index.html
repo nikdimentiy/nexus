@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -18,289 +18,61 @@
     <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png" />
     <link rel="manifest" href="favicon/site.webmanifest" />
     <title>NEXUS · COMMAND HUB</title>
-    <!-- Preload key font stylesheet to unblock render -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" as="style" />
+
+    <!-- Fonts: all three views combined -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital@1&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
       rel="stylesheet"
       integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
       crossorigin="anonymous"
     />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="css/index.css">
-    <link rel="stylesheet" href="css/auth.css">
-    <link rel="prefetch" href="vanguard.html">
-    <link rel="prefetch" href="mastery.html">
+
+    <!-- All view CSS loaded upfront; inactive views set to media="not all" by router -->
+    <link rel="stylesheet" href="css/index.css" data-view="nexus" />
+    <link rel="stylesheet" href="css/auth.css" />
+    <link rel="stylesheet" href="css/vanguard.css" data-view="vanguard" media="not all" />
+    <link rel="stylesheet" href="css/mastery.css" data-view="mastery" media="not all" />
+
     <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js')</script>
   </head>
   <body>
 
-    <!-- ══ AUTH WIDGET ══ -->
+    <!-- ══ AUTH OVERLAY — always in DOM, managed by router.js ══ -->
     <div id="authOverlay">
       <div class="aw-card">
         <div class="aw-logo-wrap">
           <i class="fa-solid fa-layer-group"></i>
         </div>
-
         <h2 class="aw-title">Sign in to NEXUS</h2>
         <p class="aw-subtitle">Your unified command hub</p>
-
         <div class="aw-field-group">
           <input id="overlayEmail" type="email" placeholder="Email" autocomplete="username email" />
           <div class="aw-field-sep"></div>
           <input id="overlayPassword" type="password" placeholder="Password" autocomplete="current-password" />
         </div>
-
         <div id="authOverlayError"></div>
-
         <button id="overlaySignIn" class="aw-btn" type="button">
           <span>Sign In</span>
         </button>
-
         <p class="aw-footer-note">Protected by Appwrite &middot; NEXUS Command Hub</p>
       </div>
     </div>
 
-    <div class="ambient-tl"></div>
-    <div class="ambient-tr"></div>
-    <div class="ambient-br"></div>
+    <!-- Cloud sync toast — always present so appwrite-sync.js can find it -->
+    <div id="nexusToast"></div>
 
-    <canvas id="nodeCanvas"></canvas>
-
-    <!-- BOTTOM-RIGHT DAY TIMER -->
-    <div class="day-timer-widget">
-      <div class="dt-header-label">Day Timer</div>
-      <div class="dt-slots">
-        <div class="dt-unit">
-          <div class="dt-num" id="dtH">--</div>
-          <div class="dt-lbl">HRS</div>
-        </div>
-        <div class="dt-sep">:</div>
-        <div class="dt-unit">
-          <div class="dt-num" id="dtM">--</div>
-          <div class="dt-lbl">MIN</div>
-        </div>
-        <div class="dt-sep">:</div>
-        <div class="dt-unit">
-          <div class="dt-num" id="dtS">--</div>
-          <div class="dt-lbl">SEC</div>
-        </div>
-      </div>
-      <div class="dt-bar-wrap">
-        <div class="dt-bar-fill" id="dtBarFill" style="width:0%"></div>
-      </div>
-      <div class="dt-sublabel" id="dtSublabel">Current Time</div>
-    </div>
-
-    <!-- BOTTOM-LEFT COUNTDOWN WIDGET -->
-    <div class="header-right">
-      <div class="clock-header-label">Day Countdown</div>
-      <div class="clock-slots">
-        <div class="clock-unit">
-          <div class="clock-time" id="clockH">--</div>
-          <div class="clock-unit-lbl">HRS</div>
-        </div>
-        <div class="clock-sep">:</div>
-        <div class="clock-unit">
-          <div class="clock-time" id="clockM">--</div>
-          <div class="clock-unit-lbl">MIN</div>
-        </div>
-        <div class="clock-sep">:</div>
-        <div class="clock-unit">
-          <div class="clock-time" id="clockS">--</div>
-          <div class="clock-unit-lbl">SEC</div>
-        </div>
-      </div>
-      <div class="clock-bar-wrap">
-        <div class="clock-bar-fill" id="clockBarFill" style="width:0%"></div>
-      </div>
-      <div class="clock-sublabel" id="clockRemLabel">Until Midnight</div>
-    </div>
-
-    <div class="ticker-wrap">
-      <div class="ticker-label">SYSTEM FEED</div>
-      <div class="ticker-track">
-        <div class="ticker-inner" id="tickerInner"></div>
-      </div>
-    </div>
-
-    <div class="page-wrap">
-      <header class="nexus-header">
-        <div class="brand">
-          <div class="brand-sigil">
-            <i class="fa-solid fa-layer-group"></i>
-          </div>
-          <div class="brand-text">
-            <h1>NEXUS</h1>
-            <p>Unified Command Hub</p>
-          </div>
-        </div>
-
-        <div class="header-mini-widgets">
-          <div class="mini-widget">
-            <div class="mini-widget-name mastery-color" onclick="window.location.href='mastery.html'">MASTERY</div>
-            <div class="mini-widget-stat" id="mwMasteryStat">-- / -- RITUALS</div>
-            <div class="mini-widget-bar-wrap">
-              <div class="mini-widget-bar mastery-bar" id="mwMasteryBar" style="width:0%"></div>
-            </div>
-          </div>
-          <div class="mini-widget">
-            <div class="mini-widget-name vanguard-color" onclick="window.location.href='vanguard.html'">VANGUARD</div>
-            <div class="mini-widget-stat" id="mwVanguardStat">-- / -- MISSIONS</div>
-            <div class="mini-widget-bar-wrap">
-              <div class="mini-widget-bar vanguard-bar" id="mwVanguardBar" style="width:0%"></div>
-            </div>
-          </div>
-          <div class="mini-widget-divider"></div>
-          <div class="mini-widget streak-widget">
-            <div class="streak-sweep"></div>
-            <i class="fa-solid fa-fire streak-icon"></i>
-            <div class="mini-widget-name streak-color"><i class="fa-solid fa-fire"></i>STREAK</div>
-            <div class="mini-widget-stat" id="mwStreakStat">-- DAYS</div>
-            <div class="mini-widget-bar-wrap">
-              <div class="mini-widget-bar streak-bar" id="mwStreakBar" style="width:0%"></div>
-            </div>
-          </div>
-        </div>
-
-        <div id="authBox">
-          <div id="authUser">
-            <span id="greetingText" class="greeting-text"></span>
-            <button id="btnSignOut">Sign Out</button>
-          </div>
-        </div>
-
-      </header>
-
-      <div class="time-matrix panel" id="timeMatrixContainer">
-        <div class="today-widget">
-          <div class="today-date" id="todayDateNum">--</div>
-          <div class="today-meta">
-            <div class="today-day" id="todayDayName">-------</div>
-            <div class="today-month" id="todayMonthYear">---- ----</div>
-          </div>
-        </div>
-        <div class="month-timeline">
-          <div class="timeline-header">
-            <span>Monthly Cycle Progress</span>
-            <span id="monthProgressPct">--% COMPLETE</span>
-          </div>
-          <div class="bricks-container" id="bricksContainer"></div>
-        </div>
-        <div class="delta-widget" id="dayDeltaWidget">
-          <div class="delta-label">Comparison (vs Yesterday)</div>
-          <div class="delta-main">
-            <div
-              class="delta-arrow"
-              id="deltaArrow"
-              style="color: var(--text-dim)"
-            >
-              —
-            </div>
-            <div class="delta-pct" id="deltaPct" style="color: var(--text-dim)">
-              —
-            </div>
-            <div class="delta-sub" id="deltaSub"></div>
-          </div>
-          <div class="delta-bars" id="deltaBars"></div>
-        </div>
-      </div>
-
-      <!-- ── WEEK ACTIVITY PANEL ── -->
-      <div class="week-panel panel" id="weekPanel">
-        <div class="week-tab-btns">
-          <button class="week-tab-btn active" id="wtbPlanning"
-            style="--wtb-color:#38bdf8;--wtb-rgb:56,189,248;--wtb-gradient:linear-gradient(135deg,#38bdf8,#0284c7)"
-            onclick="switchWeekTab('planning')">
-            <i class="fa-solid fa-calendar-check wtb-icon"></i>
-            <span class="wtb-label">Planning</span>
-            <span class="wtb-count" id="wtbPlanningCount">—/7</span>
-          </button>
-          <button class="week-tab-btn" id="wtbTracking"
-            style="--wtb-color:#e879f9;--wtb-rgb:232,121,249;--wtb-gradient:linear-gradient(135deg,#f0abfc,#e879f9)"
-            onclick="switchWeekTab('tracking')">
-            <i class="fa-solid fa-chart-line wtb-icon"></i>
-            <span class="wtb-label">Tracking</span>
-            <span class="wtb-count" id="wtbTrackingCount">—/7</span>
-          </button>
-          <button class="week-tab-btn" id="wtbOntrack"
-            style="--wtb-color:#9ca3af;--wtb-rgb:156,163,175;--wtb-gradient:linear-gradient(135deg,#d1d5db,#6b7280)"
-            onclick="switchWeekTab('ontrack')">
-            <i class="fa-solid fa-route wtb-icon"></i>
-            <span class="wtb-label">OnTrack</span>
-            <span class="wtb-count" id="wtbOntrackCount">—/7</span>
-          </button>
-        </div>
-
-        <div class="week-stats">
-          <div class="week-stats-header">
-            <div class="week-stats-title" id="weekStatsTitle">This Week · Planning</div>
-          </div>
-          <div class="week-day-row" id="weekDayRow"></div>
-          <div class="week-bottom">
-            <div>
-              <div class="week-main-stat">
-                <span class="week-stat-num" id="weekStatNum">—</span>
-                <span class="week-stat-denom">/7</span>
-              </div>
-              <div class="week-stat-lbl">days this week</div>
-            </div>
-            <div class="week-vs">
-              <div class="week-vs-label">vs prev week</div>
-              <div class="week-vs-delta" id="weekVsDelta">—</div>
-              <div class="week-vs-prev" id="weekVsPrev">prev: — days</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="readiness-banner panel">
-
-        <!-- Left column: score display -->
-        <div class="rb-score-col">
-          <div class="rb-score-eyebrow">READINESS</div>
-          <span id="gaugePct">—</span>
-          <div class="rb-score-bar-wrap">
-            <div class="rb-score-bar-fill" id="scoreFill"></div>
-          </div>
-        </div>
-
-        <!-- Center column: status + system bars -->
-        <div class="rb-meta-col">
-          <div class="rb-eyebrow">// System Readiness Overview</div>
-          <div class="readiness-title" id="readinessTitle">LOADING...</div>
-          <div class="mini-bars" id="miniBars"></div>
-        </div>
-
-        <!-- Right column: stat items -->
-        <div class="rb-stats-col">
-          <div class="readiness-stats" id="globalStats"></div>
-        </div>
-
-      </div>
-
-      <div class="app-grid" id="appGrid"></div>
-
-      <div id="nexusToast"></div>
-
-      <footer class="nexus-footer">
-        <div class="footer-left">
-          <span class="pulse-dot"></span>
-          Systems Active · Synced via Appwrite Cloud
-        </div>
-        <div id="lastRefresh">LAST SYNC —</div>
-      </footer>
-    </div>
+    <!-- View container — router renders each view here -->
+    <div id="app"></div>
 
     <script src="js/storage.js"></script>
-    <script type="module" src="js/index.js"></script>
-
-    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/router.js"></script>
 
     <!-- file:// guard — runs even when modules fail to load -->
     <script>

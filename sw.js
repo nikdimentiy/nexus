@@ -7,8 +7,6 @@ const STATIC = [
   './',
   './index.html',
   './offline.html',
-  './vanguard.html',
-  './mastery.html',
   './css/index.css',
   './css/vanguard.css',
   './css/mastery.css',
@@ -16,11 +14,10 @@ const STATIC = [
   './js/storage.js',
   './js/config.js',
   './js/appwrite-sync.js',
-  './js/auth-guard.js',
-  './js/auth.js',
-  './js/index.js',
-  './js/mastery.js',
-  './js/vanguard.js',
+  './js/router.js',
+  './js/views/nexus.js',
+  './js/views/vanguard.js',
+  './js/views/mastery.js',
 ]
 
 self.addEventListener('install', e => {
