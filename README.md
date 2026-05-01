@@ -1,98 +1,228 @@
-# ⚡ NEXUS Command Hub
+# ⚡ NEXUS · COMMAND HUB
 
-> Your unified command hub for daily execution, habit mastery, and strategic life analytics.
+> 🎯 **Your unified personal operating system** — daily execution, ritual mastery, and strategic life analytics, all in one place.
 
-NEXUS is a personal operating system built to manage discipline, performance, and mission progress from one place. It combines a central dashboard, a ritual-tracking system, and a strategic analytics layer into a single experience.
+NEXUS is a **hash-router SPA** built for discipline, performance, and mission progress. No full page reloads — instant transitions between three interconnected command modules, all guarded by Appwrite authentication and cached for offline use.
 
-## 🧭 Overview
+---
 
-NEXUS is designed around three connected systems: the main command hub, the daily mastery interface, and the Vanguard analytics module. Together they provide visibility into daily execution, weekly consistency, streaks, readiness, forecasting, and long-range performance patterns.
+## 🧭 Architecture
+
+```text
+⚡ index.html  ←  Single shell — SPA entry point
+      │
+      ├── 🔐 Auth Overlay     always in DOM, zero-latency sign-in
+      ├── 🔄 js/router.js     hash routing · in-memory auth cache · realtime
+      │         │
+      │         ├── #          → 🏠 js/views/nexus.js
+      │         ├── #vanguard  → 🛡️ js/views/vanguard.js
+      │         └── #mastery   → 🎯 js/views/mastery.js
+      │
+      └── 🎨 CSS              all four sheets loaded upfront
+                              inactive views → media="not all"
+```
+
+**Zero round-trips** after first auth. Navigate between all three views at the speed of `import()`.
+
+---
 
 ## 🧩 Core Modules
 
-### 🏠 NEXUS Hub
-The main dashboard acts as the central control layer with sign-in, day timers, countdowns, weekly panels, readiness status, and system-wide controls. It unifies key mission systems like Mastery, Vanguard, Goals, OnTrack, and Tracking into one operational view.
+### 🏠 NEXUS Hub — `#`
 
-### 🎯 Mastery
-Mastery is the daily ritual engine focused on consistent self-development through repeatable habits and measurable streaks. It tracks metrics like current streak, best streak, total logged days, perfect days, 7-day average, mastery score, and ritual completion progress.
+The central command layer. Live clock, day countdown, monthly cycle progress, weekly planning/tracking panels, readiness score, and the full system overview. Entry point for all connected modules.
 
-### 🛡️ Vanguard
-Vanguard is the strategic intelligence layer built for cycle review, forecasting, mission scoring, and deeper performance analysis. It includes AI forecast widgets, cycle efficiency breakdowns, strategic insights, monthly progress views, and daily input controls like planning, deep work, energy, and on-track status.
+### 🎯 Mastery — `#mastery`
+
+The daily ritual engine. 8 daily disciplines tracked with streaks, perfect days, energy levels, and a calendar brick wall. Cross-syncs ritual completions ↔ Vanguard missions in real time via BroadcastChannel.
+
+### 🛡️ Vanguard — `#vanguard`
+
+The strategic intelligence layer. Cycle analytics, AI-assisted forecasting, mission scoring, deep work tracking, efficiency breakdowns, and long-range performance patterns. Full keyboard-command interface.
+
+---
 
 ## ✨ Features
 
-- ⏱️ Real-time day timer and countdown to midnight for daily awareness  
-- 🔐 Authentication-protected experience powered by Appwrite  
-- 📊 Weekly planning, tracking, and on-track progress panels  
-- 📈 Readiness overview with system health indicators and score visualization  
-- 🔥 Streak tracking, perfect days, and ritual completion analytics  
-- 🧠 Energy-level tracking for daily context and performance correlation  
-- 🤖 AI-assisted forecasting and cycle analytics for strategic decision-making  
-- ⌨️ Keyboard shortcuts and fast command-style navigation in Vanguard
+| Feature | Detail |
+| --- | --- |
+| ⚡ **Instant navigation** | Hash-router SPA — no page reloads between views |
+| 🔐 **Auth guard** | Appwrite-backed session, cached in memory after first check |
+| 🌐 **Realtime sync** | Appwrite Realtime + BroadcastChannel for cross-view state |
+| 📴 **Offline support** | Service worker caches all assets after first visit |
+| ⏱️ **Live day clock** | Real-time countdown to midnight + day progress bar |
+| 🔥 **Streak engine** | Current / best streak, perfect days, 7-day rolling avg |
+| 🧠 **Energy tagging** | Log daily energy level; syncs across Mastery ↔ Vanguard |
+| 🤖 **AI forecasting** | Cycle prediction and efficiency analytics in Vanguard |
+| ⌨️ **Keyboard nav** | Full shortcut layer in every view — no mouse required |
+| 🎉 **Confetti** | One-time celebration on 8/8 perfect ritual days |
 
-## 🏋️ Daily Ritual System
+---
 
-Mastery tracks 8 core rituals that shape daily consistency and personal growth:
+## 🏋️ The 8 Daily Rituals
 
-- ✍️ English — create opportunities · global voice  
-- 💰 Green Money — build abundant future · financial fortress  
-- 💪 Fitness — forge elite body · sculpted physique  
-- 📚 Reading — intellectual feast · expand knowledge  
-- 🧠 Learning — cyber learning · build & grow daily  
-- 🌅 Wake Early — prime day launch · win the morning  
-- 🌱 Sugar-Free — virtue cultivator · replace bad input  
-- 🚫 Bad Habit — override bad habit · build character
+Mastery tracks these disciplines every day, building streaks and measuring consistency:
 
-## 📊 What You Can Track
+| # | Ritual | Mission |
+| --- | --- | --- |
+| `1` | ✍️ **English** | Create opportunities · global voice |
+| `2` | 💰 **Green Money** | Build abundant future · financial fortress |
+| `3` | 💪 **Fitness** | Forge elite body · sculpted physique |
+| `4` | 📚 **Reading** | Intellectual feast · expand knowledge |
+| `5` | 🧠 **Learning** | Cyber learning · build & grow daily |
+| `6` | 🌅 **Wake Early** | Prime day launch · win the morning |
+| `7` | 🌱 **Sugar-Free** | Virtue cultivator · replace bad input |
+| `8` | 🚫 **Bad Habit** | Override bad habit · build character |
 
-### In the Hub
-- Day timer and live clock  
-- Monthly cycle progress  
-- Comparison vs yesterday  
-- Weekly planning/tracking/on-track stats  
-- Readiness score and system overview
+---
 
-### In Mastery
-- Daily ritual completion  
-- Streaks and best records  
-- Perfect days and weekly totals  
-- Energy level logging  
-- Mission timeline calendar
+## ⌨️ Keyboard Shortcuts
 
-### In Vanguard
-- Today’s score and year progress  
-- Daily notes and strategic inputs  
-- Deep work hours  
-- Planning and early wake toggles  
-- AI forecast and cycle efficiency insights
+### 🏠 Nexus Hub
 
-## 🛠️ Tech Direction
+| Key | Action |
+| --- | --- |
+| `V` | → Vanguard |
+| `M` | → Mastery |
 
-The project uses a modular frontend structure with separate pages for the hub, mastery, and vanguard systems, each loading dedicated JavaScript and CSS assets. The interface integrates Font Awesome icons, Google Fonts, local storage/data export flows, and Appwrite-backed authentication protection.
+### 🎯 Mastery
 
-## 🚀 Vision
+| Key | Action |
+| --- | --- |
+| `1`–`8` | Toggle ritual |
+| `L` / `M` / `H` | Set energy Low / Medium / High |
+| `D` | Scroll to ritual grid |
+| `P` | Scroll to top |
+| `C` | Jump calendar to today |
+| `N` | → Nexus |
+| `V` | → Vanguard |
+| `Esc` | Close day modal |
 
-NEXUS is more than a dashboard. It is a personal command center for discipline, clarity, and momentum—built to turn daily actions into measurable long-term progress.
+### 🛡️ Vanguard
 
-## 📁 Project Structure
+| Key | Action |
+| --- | --- |
+| `N` | → Nexus |
+| `Esc` | Close modal |
+
+---
+
+## 📊 What You Can Measure
+
+### 🏠 Hub
+
+- 🕐 Live day timer & clock
+- 📅 Monthly cycle progress
+- ↕️ Delta vs yesterday
+- 📋 Weekly plan / track / on-track stats
+- 💚 Readiness score & system health
+
+### 🎯 Mastery
+
+- ✅ Daily ritual completion (8/8)
+- 🔥 Current & best streak
+- 🏆 Perfect days (all-time)
+- 📊 7-day rolling average
+- 🌟 Lifetime mastery score
+- 🗓️ Calendar brick wall (month view with day modal)
+- ⚡ Energy level log
+
+### 🛡️ Vanguard
+
+- 🎯 Today's mission score
+- 📈 Year-to-date progress
+- 🧩 Deep work hours
+- 🗒️ Daily notes & strategic inputs
+- 🌄 Early wake toggle (synced ↔ Mastery)
+- 🤖 AI forecast & cycle efficiency
+
+---
+
+## 🗂️ Project Structure
+
+```text
+nexus/
+├── 📄 index.html              SPA shell — single entry point
+├── 📄 offline.html            Offline fallback page
+├── 📄 sw.js                   Service worker — caches all assets
+├── 📄 vite.config.js          Build config (single entry)
+│
+├── 🎨 css/
+│   ├── index.css              Nexus hub styles
+│   ├── vanguard.css           Vanguard styles
+│   ├── mastery.css            Mastery styles (Rolls-Royce edition)
+│   └── auth.css               Auth overlay styles
+│
+└── ⚙️ js/
+    ├── router.js              Hash router · auth guard · overlay wiring
+    ├── storage.js             Shared globals (todayKey, escapeHtml, trapFocus, nexusSync)
+    ├── appwrite-sync.js       Auth · cloud sync · realtime subscription
+    ├── config.js              Appwrite project config
+    └── views/
+        ├── nexus.js           🏠 Hub view module
+        ├── vanguard.js        🛡️ Vanguard view module
+        └── mastery.js         🎯 Mastery view module
+```
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+| --- | --- |
+| 🏗️ **Framework** | Vanilla JS SPA — hash router, dynamic `import()`, view lifecycle |
+| ☁️ **Auth & Sync** | [Appwrite](https://appwrite.io) — sessions, realtime, cloud storage |
+| ⚡ **Build** | [Vite 5](https://vitejs.dev) — code splitting, single entry |
+| 🎨 **Fonts** | Inter · Outfit · JetBrains Mono · Plus Jakarta Sans · Cormorant Garamond |
+| 🔣 **Icons** | Font Awesome 6.5 |
+| 📴 **Offline** | Service Worker — cache-first strategy |
+| 💾 **Storage** | `localStorage` (primary) + Appwrite cloud (sync) |
+| 🔁 **Cross-tab** | BroadcastChannel for live cross-view state updates |
+
+---
+
+## 🚀 Getting Started
+
+### Development
 
 ```bash
-.
-├── index.html        # ⚡ Main NEXUS command hub
-├── mastery.html      # 🎯 Daily ritual and streak system
-├── vanguard.html     # 🛡️ Strategic analytics and forecasting
-├── css/              # 🎨 Stylesheets
-├── js/               # ⚙️ Logic and system behavior
-├── favicon/          # 🧿 App icons
+npm install
+npm run dev        # → http://localhost:5173
 ```
 
-## 🔐 Access
+### Production Build
 
-The interface is protected and intended to run in a proper local or hosted server environment rather than direct file access. The sign-in experience is connected to Appwrite and the local file fallback warns users to launch via a local server such as:
+```bash
+npm run build      # outputs to dist/
+npm run preview    # preview the build locally
 ```
-python3 -m http.server 8080
+
+### Other Commands
+
+```bash
+npm run lint       # ESLint on js/
+npm run format     # Prettier on all JS/HTML/CSS
 ```
+
+> ⚠️ **Must run via HTTP server** — sign-in requires `http://` not `file://`.  
+> Quick fallback: `python3 -m http.server 8080`
+
+---
+
+## 🔐 Auth & Access
+
+Authentication is handled by Appwrite. On first load the router checks session state once and caches it in memory — all subsequent view transitions are instant with zero auth round-trips.
+
+- **Protected routes:** `#vanguard`, `#mastery` — unauthenticated users are redirected to `#`
+- **Public route:** `#` (nexus hub) — sign-in overlay is shown until authenticated
+- **Rate limiting:** 5 failed attempts triggers a 60-second lockout with countdown
+
+---
 
 ## 📌 Status
 
-🚧 Personal high-performance operating system in active development
+🚧 **Personal high-performance operating system** — in active development
+
+---
+
+*⚡ Built for discipline, clarity, and momentum — turning daily actions into measurable long-term progress.*
