@@ -51,12 +51,12 @@ const TEMPLATE = /* html */`
       </div>
 
       <div class="header-mini-widgets">
-        <div class="mini-widget">
+        <div class="mini-widget" id="mwMasteryWidget">
           <div class="mini-widget-name mastery-color" id="mwMasteryLink">MASTERY</div>
           <div class="mini-widget-stat" id="mwMasteryStat">-- / -- RITUALS</div>
           <div class="mini-widget-bar-wrap"><div class="mini-widget-bar mastery-bar" id="mwMasteryBar" style="width:0%"></div></div>
         </div>
-        <div class="mini-widget">
+        <div class="mini-widget" id="mwVanguardWidget">
           <div class="mini-widget-name vanguard-color" id="mwVanguardLink">VANGUARD</div>
           <div class="mini-widget-stat" id="mwVanguardStat">-- / -- MISSIONS</div>
           <div class="mini-widget-bar-wrap"><div class="mini-widget-bar vanguard-bar" id="mwVanguardBar" style="width:0%"></div></div>
@@ -183,11 +183,10 @@ const TEMPLATE = /* html */`
 export async function init(container, user) {
   container.innerHTML = TEMPLATE
 
-  // Wire mini-widget navigation links
-  document.getElementById('mwMasteryLink').style.cursor = 'pointer'
-  document.getElementById('mwMasteryLink').addEventListener('click', () => { location.hash = 'mastery' })
-  document.getElementById('mwVanguardLink').style.cursor = 'pointer'
-  document.getElementById('mwVanguardLink').addEventListener('click', () => { location.hash = 'vanguard' })
+  // Wire mini-widget navigation links (mobile only)
+  const isMobile = () => window.innerWidth <= 640
+  document.getElementById('mwMasteryWidget').addEventListener('click', () => { if (isMobile()) location.hash = 'mastery' })
+  document.getElementById('mwVanguardWidget').addEventListener('click', () => { if (isMobile()) location.hash = 'vanguard' })
 
   // Sign out
   document.getElementById('btnSignOut').onclick = () =>
