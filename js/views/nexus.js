@@ -73,7 +73,7 @@ const TEMPLATE = /* html */`
 
       <div id="authBox">
         <div id="authUser" style="display:flex;align-items:center;gap:10px;">
-          <span id="greetingText" class="greeting-text"></span>
+          <button id="greetingText" class="user-icon-btn" title="Account"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></button>
           <button id="btnSignOut">Sign Out</button>
         </div>
       </div>
@@ -193,10 +193,28 @@ export async function init(container, user) {
   document.getElementById('btnSignOut').onclick = () =>
     document.dispatchEvent(new CustomEvent('nexus:signout'))
 
-  // Show greeting
+  // Show greeting icon
   if (user) {
     const greetEl = document.getElementById('greetingText')
-    if (greetEl) greetEl.textContent = user.email || 'Welcome back!'
+    if (greetEl) {
+      const email = user.email || 'No email'
+      greetEl.addEventListener('click', (e) => {
+        e.stopPropagation()
+        let popup = document.getElementById('userEmailPopup')
+        if (!popup) {
+          popup = document.createElement('div')
+          popup.id = 'userEmailPopup'
+          popup.className = 'user-email-popup'
+          document.body.appendChild(popup)
+          document.addEventListener('click', () => { popup.style.display = 'none' })
+        }
+        popup.textContent = email
+        const rect = greetEl.getBoundingClientRect()
+        popup.style.top = (rect.bottom + 8) + 'px'
+        popup.style.left = rect.left + 'px'
+        popup.style.display = 'block'
+      })
+    }
     document.getElementById('authUser').style.display = 'flex'
   }
 
