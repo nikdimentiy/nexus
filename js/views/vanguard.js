@@ -328,11 +328,13 @@ export async function init(container, user) {
   const btnToggleTheme = document.getElementById('btn-toggle-theme')
   let theme = localStorage.getItem('matrix-theme') || 'light'
   function applyTheme() {
-    if (theme === 'dark') { body.classList.add('theme-dark'); btnToggleTheme.innerHTML = '<i class="fa-regular fa-sun"></i> Light' }
-    else { body.classList.remove('theme-dark'); btnToggleTheme.innerHTML = '<i class="fa-solid fa-moon"></i> Dark' }
+    body.classList.remove('theme-dark', 'theme-cyber')
+    if (theme === 'dark')       { body.classList.add('theme-dark');  btnToggleTheme.innerHTML = '<i class="fa-solid fa-bolt"></i> Cyber' }
+    else if (theme === 'cyber') { body.classList.add('theme-cyber'); btnToggleTheme.innerHTML = '<i class="fa-regular fa-sun"></i> Light' }
+    else                        { btnToggleTheme.innerHTML = '<i class="fa-solid fa-moon"></i> Dark' }
     localStorage.setItem('matrix-theme', theme)
   }
-  btnToggleTheme.addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme() })
+  btnToggleTheme.addEventListener('click', () => { theme = theme === 'light' ? 'dark' : theme === 'dark' ? 'cyber' : 'light'; applyTheme() })
   applyTheme()
 
   // ── State ─────────────────────────────────────────────────────────────────────
@@ -1092,7 +1094,7 @@ export async function init(container, user) {
     if (e.key==='t'||e.key==='T') jumpToToday()
     if (e.key==='ArrowLeft') shiftCycle(-1)
     if (e.key==='ArrowRight') shiftCycle(1)
-    if (e.key==='d'||e.key==='D'){theme=theme==='dark'?'light':'dark';applyTheme()}
+    if (e.key==='d'||e.key==='D'){theme=theme==='light'?'dark':theme==='dark'?'cyber':'light';applyTheme()}
     if (e.key==='s'||e.key==='S'){sidebarCollapsed=!sidebarCollapsed;localStorage.setItem('matrix-sidebar-collapsed',sidebarCollapsed);applySidebarState()}
     if (e.key==='h'||e.key==='H'){widgetsHidden=!widgetsHidden;localStorage.setItem('matrix-widgets-hidden',widgetsHidden);applyWidgetsState()}
     if (e.key==='+'){
@@ -1139,8 +1141,8 @@ export async function init(container, user) {
 
   return function destroy() {
     document.removeEventListener('keydown', _keyHandler)
-    // Remove theme-dark class if we added it — reset body for other views
-    body.classList.remove('theme-dark')
+    // Remove theme classes — reset body for other views
+    body.classList.remove('theme-dark', 'theme-cyber')
     container.innerHTML = ''
   }
 }

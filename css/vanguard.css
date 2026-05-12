@@ -95,6 +95,156 @@ body.theme-dark {
 }
 
 /* ════════════════════════
+   CYBER THEME  (dark · blue · green gradient)
+   ════════════════════════ */
+body.theme-cyber {
+  /* surfaces — deep space black */
+  --bg-base:    #070b12;
+  --bg-surface: #0b1422;
+  --bg-card:    #0d1826;
+  --bg-sidebar: #090e1a;
+  --bg-hover:   #12202e;
+  --bg-inset:   #050810;
+
+  /* accent — electric blue */
+  --accent:      #00c8ff;
+  --accent-dim:  #0090c0;
+  --accent-soft: rgba(0, 200, 255, 0.09);
+
+  /* semantic — neon palette */
+  --green:  #00e87a;
+  --cyan:   #00f0ff;
+  --rose:   #ff3d6b;
+  --gold:   #ffc200;
+  --violet: #a855f7;
+  --teal:   #00e87a;
+  --slate:  #3a6a90;
+  --amber:  #ffaa00;
+
+  /* text hierarchy */
+  --text-1: #d4eeff;
+  --text-2: #6ea8cc;
+  --text-3: #3a6a8a;
+  --text-4: #1e4060;
+
+  /* borders — cyan tinted */
+  --border-1: rgba(0, 200, 255, 0.07);
+  --border-2: rgba(0, 200, 255, 0.13);
+  --border-3: rgba(0, 200, 255, 0.24);
+
+  /* shadows — deep with cyan glow */
+  --shadow-xs: 0 1px 3px rgba(0,0,0,0.60);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.55), 0 0 10px rgba(0,200,255,0.04);
+  --shadow-md: 0 4px 18px rgba(0,0,0,0.65), 0 0 18px rgba(0,200,255,0.06);
+  --shadow-lg: 0 12px 44px rgba(0,0,0,0.75), 0 0 32px rgba(0,200,255,0.09);
+
+  /* gradient body background */
+  background:
+    radial-gradient(ellipse at 18% 0%,   rgba(0,70,140,0.38) 0%, transparent 52%),
+    radial-gradient(ellipse at 82% 100%, rgba(0,80,80,0.22)  0%, transparent 48%),
+    #070b12;
+}
+
+/* ── Cyber gradient surfaces ── */
+body.theme-cyber .sidebar {
+  background: linear-gradient(160deg, #0d1c2e 0%, #070c18 100%);
+  border-right-color: rgba(0, 200, 255, 0.10);
+}
+body.theme-cyber .brand {
+  background: linear-gradient(135deg, #0a1a32 0%, #060e1c 100%);
+  border-bottom-color: rgba(0, 200, 255, 0.12);
+}
+body.theme-cyber .brand-icon {
+  background: linear-gradient(135deg, #005fa0, #00c8ff);
+  box-shadow: 0 0 18px rgba(0,200,255,0.28);
+}
+body.theme-cyber .calendar-widget,
+body.theme-cyber .prediction-section,
+body.theme-cyber .grid-container {
+  background: linear-gradient(150deg, #0d1a28 0%, #080d1a 100%);
+}
+body.theme-cyber .widget-box {
+  background: linear-gradient(145deg, #0c1828 0%, #070d1c 100%);
+}
+body.theme-cyber .pred-card,
+body.theme-cyber .si-mini-card,
+body.theme-cyber .si-mission-card {
+  background: linear-gradient(145deg, #0c1828 0%, #07101e 100%);
+}
+body.theme-cyber .cal-section {
+  background: linear-gradient(145deg, #0a1624 0%, #060d1a 100%);
+}
+body.theme-cyber .modal-card {
+  background: linear-gradient(145deg, #0d1a2c 0%, #070c1a 100%);
+}
+body.theme-cyber .nexus-btn {
+  background: linear-gradient(135deg, #0d1828 0%, #070c16 100%);
+  border-color: rgba(0, 200, 255, 0.18);
+  color: #00c8ff;
+}
+body.theme-cyber .nexus-btn:hover {
+  background: linear-gradient(135deg, #0f2242 0%, #081022 100%);
+  border-color: rgba(0, 200, 255, 0.50);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.60), 0 0 28px rgba(0,200,255,0.16);
+}
+
+/* ── Cyber accent elements ── */
+body.theme-cyber .cycle-number-badge {
+  background: linear-gradient(135deg, #006aaa, #00c8ff);
+  box-shadow: 0 1px 14px rgba(0,200,255,0.38);
+}
+body.theme-cyber .current-date-widget { border-left-color: #00e87a; }
+body.theme-cyber #year-line-progress  { background: linear-gradient(90deg, #0090d0, #00c8ff); }
+body.theme-cyber .doy-fill            { background: linear-gradient(90deg, #0090d0, #00c8ff); }
+body.theme-cyber .doy-num             { color: #00c8ff; }
+body.theme-cyber .week-number-badge.current-week {
+  background: linear-gradient(135deg, #006aaa, #00c8ff);
+}
+
+/* ── Cyber green: today markers ── */
+body.theme-cyber .week-cell.today .week-cell-dot {
+  background: #00e87a;
+  border-color: #00e87a;
+  box-shadow: 0 0 10px rgba(0,232,122,0.42);
+}
+body.theme-cyber .week-cell.today .week-cell-name { color: #00e87a; }
+body.theme-cyber .dot-day.today {
+  background: linear-gradient(135deg, #00b060, #00e87a) !important;
+  border-color: #00e87a !important;
+  box-shadow: 0 0 10px rgba(0,232,122,0.42);
+}
+body.theme-cyber .cal-brick.today {
+  background: #00c8ff;
+  box-shadow: 0 0 12px rgba(0,200,255,0.42);
+}
+body.theme-cyber .month-brick.today  { background: #00c8ff; }
+body.theme-cyber .month-brick.filled {
+  background: rgba(0,200,255,0.35);
+  border-color: transparent;
+}
+
+/* ── Cyber ring ── */
+body.theme-cyber .ring-arc   { stroke: #00e87a; }
+body.theme-cyber .ring-trail { stroke: #00e87a; }
+body.theme-cyber .ring-day-sub { color: #00e87a; }
+
+/* ── Cyber mission table ── */
+body.theme-cyber .col-today { background: rgba(0,200,255,0.06) !important; }
+body.theme-cyber .col-today .date-day-num  { color: #00c8ff; }
+body.theme-cyber .col-today .date-day-name { color: #00c8ff; opacity: 0.85; }
+body.theme-cyber thead th { background: rgba(5,8,16,0.85); }
+body.theme-cyber thead .th-mission { background: rgba(7,10,20,0.92) !important; }
+
+/* ── Cyber active / selection states ── */
+body.theme-cyber .cal-section.active-section {
+  border-color: #00c8ff;
+  background: rgba(0,200,255,0.07);
+}
+body.theme-cyber .cal-section.active-section .cal-section-label { color: #00c8ff; }
+body.theme-cyber ::-webkit-scrollbar-thumb { background: rgba(0,200,255,0.22); }
+body.theme-cyber ::-webkit-scrollbar-thumb:hover { background: rgba(0,200,255,0.42); }
+
+/* ════════════════════════
    SHARED TOKENS (fixed)
    ════════════════════════ */
 :root, body.theme-dark {
