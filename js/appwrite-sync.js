@@ -411,6 +411,37 @@ export function setupRealtime() {
   )
 }
 
+/**
+ * Delete every cloud document for the current user, then wipe all synced keys
+ * from localStorage. Irreversible.
+ * @returns {{ deleted: number }} count of documents removed from the cloud
+ */
+export async function purgeAllCloudData() {
+  const userId = await getUserId()
+  if (!userId) return { deleted: 0 }
+
+  const docs = await _fetchAllDocs(userId)
+  let deleted = 0
+
+  for (const doc of docs) {
+    try {
+      await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, doc.$id)
+      deleted++
+    } catch (err) {
+      console.error('[nexus sync] purge: failed to delete doc', doc.$id, err)
+    }
+  }
+
+  _docIdCache.clear()
+
+  for (const key of _syncKeys) {
+    localStorage.removeItem(key)
+    localStorage.removeItem(`${key}__ts`)
+  }
+
+  return { deleted }
+}
+
 // ── ONLINE RECOVERY ───────────────────────────────────────────────────
 // Trigger a full sync whenever the device reconnects after being offline.
 

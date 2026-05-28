@@ -3,7 +3,7 @@
  * Exports init(container, user) → destroy fn.
  */
 
-import { saveCloudKey as _saveCloudKey } from '../appwrite-sync.js'
+import { saveCloudKey as _saveCloudKey, purgeAllCloudData } from '../appwrite-sync.js'
 
 const TEMPLATE = /* html */`
   <div class="ambient-tl"></div>
@@ -174,9 +174,24 @@ const TEMPLATE = /* html */`
       <div class="footer-left">
         <span class="pulse-dot"></span>
         Systems Active · Synced via Appwrite Cloud
+        <button id="btnPurgeCloud" class="purge-btn" title="Permanently delete all cloud data">
+          <i class="fa-solid fa-skull-crossbones"></i> PURGE CLOUD
+        </button>
       </div>
       <div id="lastRefresh">LAST SYNC —</div>
     </footer>
+  </div>
+
+  <div class="purge-modal" id="purgeModal" style="display:none">
+    <div class="purge-modal-panel">
+      <div class="purge-modal-icon"><i class="fa-solid fa-skull-crossbones"></i></div>
+      <div class="purge-modal-title">PURGE CLOUD DATA</div>
+      <div class="purge-modal-msg">This will permanently delete <strong>all synced data</strong> from Appwrite Cloud and clear it locally.<br><br>This action <strong>cannot be undone</strong>.</div>
+      <div class="purge-modal-actions">
+        <button class="purge-modal-cancel" id="purgeCancel">Cancel</button>
+        <button class="purge-modal-confirm" id="purgeConfirm"><i class="fa-solid fa-skull-crossbones"></i> PURGE ALL DATA</button>
+      </div>
+    </div>
   </div>
 `
 
@@ -191,6 +206,45 @@ export async function init(container, user) {
   // Sign out
   document.getElementById('btnSignOut').onclick = () =>
     document.dispatchEvent(new CustomEvent('nexus:signout'))
+
+  // Purge cloud data
+  const purgeModal   = document.getElementById('purgeModal')
+  const purgeConfirm = document.getElementById('purgeConfirm')
+  const purgeCancel  = document.getElementById('purgeCancel')
+
+  document.getElementById('btnPurgeCloud').addEventListener('click', () => {
+    purgeModal.style.display = 'flex'
+  })
+  purgeCancel.addEventListener('click', () => {
+    purgeModal.style.display = 'none'
+  })
+  purgeModal.addEventListener('click', e => {
+    if (e.target === purgeModal) purgeModal.style.display = 'none'
+  })
+  purgeConfirm.addEventListener('click', async () => {
+    purgeConfirm.disabled = true
+    purgeConfirm.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PURGING…'
+    try {
+      const { deleted } = await purgeAllCloudData()
+      purgeModal.style.display = 'none'
+      const toast = document.getElementById('nexusToast')
+      if (toast) {
+        toast.textContent = `Cloud purged — ${deleted} document${deleted !== 1 ? 's' : ''} deleted.`
+        toast.style.borderColor = 'rgba(244,63,94,0.5)'
+        toast.style.color       = '#f87171'
+        toast.style.boxShadow   = '0 0 24px rgba(244,63,94,0.18),0 8px 32px rgba(0,0,0,0.4)'
+        toast.classList.add('show')
+        clearTimeout(toast._timer)
+        toast._timer = setTimeout(() => toast.classList.remove('show'), 5000)
+      }
+      renderAll()
+    } catch (err) {
+      console.error('[nexus] purge failed', err)
+    } finally {
+      purgeConfirm.disabled = false
+      purgeConfirm.innerHTML = '<i class="fa-solid fa-skull-crossbones"></i> PURGE ALL DATA'
+    }
+  })
 
   // Show greeting icon
   if (user) {
