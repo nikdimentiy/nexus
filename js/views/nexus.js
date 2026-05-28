@@ -175,7 +175,7 @@ const TEMPLATE = /* html */`
         <span class="pulse-dot"></span>
         Systems Active · Synced via Appwrite Cloud
         <button id="btnPurgeCloud" class="purge-btn" title="Permanently delete all cloud data">
-          <i class="fa-solid fa-skull-crossbones"></i> PURGE CLOUD
+          <i class="fa-solid fa-fire-flame-curved"></i> PURGE CLOUD
         </button>
       </div>
       <div id="lastRefresh">LAST SYNC —</div>
@@ -184,12 +184,12 @@ const TEMPLATE = /* html */`
 
   <div class="purge-modal" id="purgeModal" style="display:none">
     <div class="purge-modal-panel">
-      <div class="purge-modal-icon"><i class="fa-solid fa-skull-crossbones"></i></div>
+      <div class="purge-modal-icon"><i class="fa-solid fa-fire-flame-curved"></i></div>
       <div class="purge-modal-title">PURGE CLOUD DATA</div>
       <div class="purge-modal-msg">This will permanently delete <strong>all synced data</strong> from Appwrite Cloud and clear it locally.<br><br>This action <strong>cannot be undone</strong>.</div>
       <div class="purge-modal-actions">
         <button class="purge-modal-cancel" id="purgeCancel">Cancel</button>
-        <button class="purge-modal-confirm" id="purgeConfirm"><i class="fa-solid fa-skull-crossbones"></i> PURGE ALL DATA</button>
+        <button class="purge-modal-confirm" id="purgeConfirm"><i class="fa-solid fa-fire-flame-curved"></i> PURGE ALL DATA</button>
       </div>
     </div>
   </div>
@@ -242,7 +242,7 @@ export async function init(container, user) {
       console.error('[nexus] purge failed', err)
     } finally {
       purgeConfirm.disabled = false
-      purgeConfirm.innerHTML = '<i class="fa-solid fa-skull-crossbones"></i> PURGE ALL DATA'
+      purgeConfirm.innerHTML = '<i class="fa-solid fa-fire-flame-curved"></i> PURGE ALL DATA'
     }
   })
 
