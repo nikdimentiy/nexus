@@ -118,6 +118,7 @@ const TEMPLATE = /* html */`
             <button class="nav-btn text-btn" id="btn-today">Today</button>
             <button class="nav-btn" id="btn-next"><i class="fa-solid fa-chevron-right"></i></button>
           </div>
+          <span class="week-number-badge current-week" id="current-week-label" title="Current Week Number (week starts from Sunday)">Week --</span>
         </div>
       </div>
       <div style="display:flex;gap:14px;align-items:flex-start;">
@@ -729,6 +730,11 @@ export async function init(container, user) {
     for (let i = 0; i < _cycleDays; i++) { const d = new Date(start); d.setDate(d.getDate() + i); dates.push(d) }
     const todayStr = formatPSTDate(getPSTDate()), months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
     updateWeekNumberBar()
+    const currentWeekNum = isoWeekNum(getPSTDate())
+    const curWeekLabel = document.getElementById('current-week-label')
+    if (curWeekLabel) {
+      curWeekLabel.textContent = `Week ${currentWeekNum}`
+    }
     const s = dates[0], e = dates[dates.length-1]
     const startMonth = months[s.getMonth()], endMonth = months[e.getMonth()], cycleNum = getCycleNumber(currentCycleStart)
     const rangeStr = startMonth === endMonth
