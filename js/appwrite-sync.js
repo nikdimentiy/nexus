@@ -14,17 +14,15 @@
  *  6. Appwrite project > Platforms → add Web platform with your hostname
  */
 
-import { Client, Account, Databases, Query, Permission, Role, ID }
-  from 'appwrite'
-import { APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID, APPWRITE_DATABASE_ID }
-  from './config.js'
+import { Client, Account, Databases, Query, Permission, Role, ID } from 'appwrite'
+import { APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID, APPWRITE_DATABASE_ID } from './config.js'
 
 // ── CONFIGURATION ───────────────────────────────────────────────────
-const ENDPOINT      = APPWRITE_ENDPOINT
-const PROJECT_ID    = APPWRITE_PROJECT_ID
-const DATABASE_ID   = APPWRITE_DATABASE_ID
+const ENDPOINT = APPWRITE_ENDPOINT
+const PROJECT_ID = APPWRITE_PROJECT_ID
+const DATABASE_ID = APPWRITE_DATABASE_ID
 const COLLECTION_ID = 'user_data'
-const PAGE_SIZE     = 100  // Appwrite max per request
+const PAGE_SIZE = 100 // Appwrite max per request
 // ────────────────────────────────────────────────────────────────────
 
 // All localStorage keys that are synced to Appwrite. Declare every key here —
@@ -38,8 +36,8 @@ const _syncKeys = new Set([
   'streak_timeTracking',
 ])
 
-const client    = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID)
-const account   = new Account(client)
+const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID)
+const account = new Account(client)
 const databases = new Databases(client)
 
 // ── SESSION CACHE ─────────────────────────────────────────────────────
@@ -58,12 +56,12 @@ function _showToast(msg, durationMs = 4000, isError = false) {
   el.textContent = msg
   if (isError) {
     el.style.borderColor = 'rgba(244,63,94,0.5)'
-    el.style.color       = '#f87171'
-    el.style.boxShadow   = '0 0 24px rgba(244,63,94,0.18), 0 8px 32px rgba(0,0,0,0.4)'
+    el.style.color = '#f87171'
+    el.style.boxShadow = '0 0 24px rgba(244,63,94,0.18), 0 8px 32px rgba(0,0,0,0.4)'
   } else {
     el.style.borderColor = ''
-    el.style.color       = ''
-    el.style.boxShadow   = ''
+    el.style.color = ''
+    el.style.boxShadow = ''
   }
   el.classList.add('show')
   clearTimeout(el._timer)
@@ -74,9 +72,7 @@ function _showToast(msg, durationMs = 4000, isError = false) {
 function _withTimeout(promise, ms = 12000) {
   return Promise.race([
     promise,
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Request timed out')), ms)
-    ),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), ms)),
   ])
 }
 
@@ -94,11 +90,17 @@ export async function signIn(email, password) {
 export async function signOut() {
   _cachedUserId = null
   _docIdCache.clear()
-  try { await account.deleteSession('current') } catch (_) {}
+  try {
+    await account.deleteSession('current')
+  } catch (_) {}
 }
 
 export async function getCurrentUser() {
-  try { return await account.get() } catch (_) { return null }
+  try {
+    return await account.get()
+  } catch (_) {
+    return null
+  }
 }
 
 // ── INTERNALS ─────────────────────────────────────────────────────────
@@ -128,16 +130,13 @@ async function _fetchAllDocs(userId) {
   let cursor = null
 
   while (true) {
-    const filters = [
-      Query.equal('user_id', userId),
-      Query.limit(PAGE_SIZE),
-    ]
+    const filters = [Query.equal('user_id', userId), Query.limit(PAGE_SIZE)]
     if (cursor) filters.push(Query.cursorAfter(cursor))
 
     const res = await _withTimeout(databases.listDocuments(DATABASE_ID, COLLECTION_ID, filters))
     all.push(...res.documents)
 
-    if (res.documents.length < PAGE_SIZE) break  // last page
+    if (res.documents.length < PAGE_SIZE) break // last page
     cursor = res.documents[res.documents.length - 1].$id
   }
 
@@ -150,7 +149,7 @@ async function _fetchAllDocs(userId) {
  * 1 API call in the normal path (update); 1 API call on first write (create).
  */
 async function _upsertDoc(userId, key, serialized) {
-  const payload  = { user_id: userId, key, value: serialized }
+  const payload = { user_id: userId, key, value: serialized }
   const cachedId = _docIdCache.get(key)
 
   if (cachedId) {
@@ -165,10 +164,9 @@ async function _upsertDoc(userId, key, serialized) {
 
   // No cached id — create a new document and cache its id
   try {
-    const doc = await _withTimeout(databases.createDocument(
-      DATABASE_ID, COLLECTION_ID, ID.unique(),
-      payload, ownerPerms(userId)
-    ))
+    const doc = await _withTimeout(
+      databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), payload, ownerPerms(userId))
+    )
     _docIdCache.set(key, doc.$id)
   } catch (err) {
     console.error('[nexus sync] createDocument failed for key:', key, err)
@@ -203,7 +201,9 @@ export async function ensureCloudDefaults() {
     if (local === null) continue
     try {
       const doc = await databases.createDocument(
-        DATABASE_ID, COLLECTION_ID, ID.unique(),
+        DATABASE_ID,
+        COLLECTION_ID,
+        ID.unique(),
         { user_id: userId, key, value: local },
         ownerPerms(userId)
       )
@@ -247,8 +247,8 @@ export async function bootstrapCloudToLocal() {
       const doc = cloudDocs.get(key)
       if (!doc) continue
 
-      const cloudMs  = new Date(doc.$updatedAt).getTime()
-      const localMs  = parseInt(localStorage.getItem(`${key}__ts`) ?? '0', 10)
+      const cloudMs = new Date(doc.$updatedAt).getTime()
+      const localMs = parseInt(localStorage.getItem(`${key}__ts`) ?? '0', 10)
       const hasLocal = localStorage.getItem(key) !== null
 
       if (hasLocal && localMs > cloudMs) {
@@ -305,13 +305,15 @@ export async function syncOnLogin() {
 
   for (const key of _syncKeys) {
     try {
-      const doc   = cloudDocs.get(key)
+      const doc = cloudDocs.get(key)
       const local = localStorage.getItem(key)
 
       if (!doc) {
         if (local !== null) {
           const newDoc = await databases.createDocument(
-            DATABASE_ID, COLLECTION_ID, ID.unique(),
+            DATABASE_ID,
+            COLLECTION_ID,
+            ID.unique(),
             { user_id: userId, key, value: local },
             ownerPerms(userId)
           )
@@ -379,14 +381,14 @@ export function setupRealtime() {
   return client.subscribe(
     `databases.${DATABASE_ID}.collections.${COLLECTION_ID}.documents`,
     async payload => {
-      const events   = payload.events ?? []
+      const events = payload.events ?? []
       const isCreate = events.some(e => e.includes('.create'))
       const isUpdate = events.some(e => e.includes('.update'))
       const isDelete = events.some(e => e.includes('.delete'))
       if (!isCreate && !isUpdate && !isDelete) return
 
-      const doc    = payload.payload
-      const userId = _cachedUserId ?? await getUserId()
+      const doc = payload.payload
+      const userId = _cachedUserId ?? (await getUserId())
 
       // Ignore events that don't belong to this user or lack a key field
       if (!doc?.key || !userId || doc.user_id !== userId) return

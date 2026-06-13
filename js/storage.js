@@ -5,8 +5,11 @@
 
 /** Safe localStorage JSON read with a fallback value. */
 window.safeJSON = function safeJSON(key, fallback = null) {
-  try { return JSON.parse(localStorage.getItem(key)) ?? fallback }
-  catch { return fallback }
+  try {
+    return JSON.parse(localStorage.getItem(key)) ?? fallback
+  } catch {
+    return fallback
+  }
 }
 
 /** Returns today as "YYYY-MM-DD" in local time. */
@@ -39,9 +42,15 @@ window.trapFocus = function trapFocus(modalEl) {
     const focusable = getFocusable()
     const last = focusable[focusable.length - 1]
     if (e.shiftKey) {
-      if (document.activeElement === focusable[0]) { e.preventDefault(); last?.focus() }
+      if (document.activeElement === focusable[0]) {
+        e.preventDefault()
+        last?.focus()
+      }
     } else {
-      if (document.activeElement === last) { e.preventDefault(); focusable[0]?.focus() }
+      if (document.activeElement === last) {
+        e.preventDefault()
+        focusable[0]?.focus()
+      }
     }
   }
   modalEl.addEventListener('keydown', handler)
@@ -54,7 +63,11 @@ window._nexusSync = (() => {
     const ch = new BroadcastChannel('nexus-sync')
     return {
       broadcast: src => ch.postMessage({ type: 'storage-update', source: src }),
-      listen:    cb  => { ch.onmessage = e => { if (e.data?.type === 'storage-update') cb() } },
+      listen: cb => {
+        ch.onmessage = e => {
+          if (e.data?.type === 'storage-update') cb()
+        }
+      },
     }
   } catch {
     return { broadcast: () => {}, listen: () => {} }

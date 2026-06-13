@@ -9,12 +9,7 @@
  * Subsequent navigations never hit Appwrite — zero latency between views.
  */
 
-import {
-  signIn, signOut,
-  getCurrentUser,
-  syncOnLogin,
-  setupRealtime,
-} from './appwrite-sync.js'
+import { signIn, signOut, getCurrentUser, syncOnLogin, setupRealtime } from './appwrite-sync.js'
 
 // ── CSS switcher ─────────────────────────────────────────────────────────────
 // Each view's stylesheet has data-view="<name>". Inactive ones use media="not all"
@@ -26,7 +21,7 @@ function activateCSS(viewName) {
 }
 
 // ── Auth state — cached in memory after first check ──────────────────────────
-let _user = undefined   // undefined = not yet checked; null = not signed in
+let _user = undefined // undefined = not yet checked; null = not signed in
 let _realtimeUnsub = null
 
 async function getUser() {
@@ -36,17 +31,17 @@ async function getUser() {
 }
 
 // ── Auth overlay wiring (moved here from auth.js) ────────────────────────────
-const overlay      = document.getElementById('authOverlay')
+const overlay = document.getElementById('authOverlay')
 const overlayEmail = document.getElementById('overlayEmail')
-const overlayPass  = document.getElementById('overlayPassword')
-const overlayBtn   = document.getElementById('overlaySignIn')
-const overlayErr   = document.getElementById('authOverlayError')
-const userEl       = document.getElementById('authUser')  // may be null until nexus renders
+const overlayPass = document.getElementById('overlayPassword')
+const overlayBtn = document.getElementById('overlaySignIn')
+const overlayErr = document.getElementById('authOverlayError')
+const userEl = document.getElementById('authUser') // may be null until nexus renders
 
 const MAX_ATTEMPTS = 5
-const LOCKOUT_MS   = 60_000
-let failCount      = 0
-let lockedUntil    = 0
+const LOCKOUT_MS = 60_000
+let failCount = 0
+let lockedUntil = 0
 
 function showOverlayError(msg) {
   overlayErr.textContent = msg
@@ -63,7 +58,7 @@ function hideOverlay() {
 function showOverlay() {
   overlay.classList.remove('auth-gone', 'auth-fade-out')
   overlayEmail.value = ''
-  overlayPass.value  = ''
+  overlayPass.value = ''
   clearOverlayError()
 }
 
@@ -91,8 +86,11 @@ async function doOverlaySignIn() {
   if (Date.now() < lockedUntil) return
   clearOverlayError()
   const email = overlayEmail.value.trim()
-  const pass  = overlayPass.value
-  if (!email || !pass) { showOverlayError('Please enter your email and password.'); return }
+  const pass = overlayPass.value
+  if (!email || !pass) {
+    showOverlayError('Please enter your email and password.')
+    return
+  }
 
   overlayBtn.disabled = true
   overlayBtn.classList.add('loading')
@@ -103,30 +101,48 @@ async function doOverlaySignIn() {
     const { error } = await signIn(email, pass)
     if (error) {
       failCount++
-      if (failCount >= MAX_ATTEMPTS) { overlayBtn.classList.remove('loading'); setLockout(); return }
-      const isNetwork = !navigator.onLine || error.code === 0 ||
+      if (failCount >= MAX_ATTEMPTS) {
+        overlayBtn.classList.remove('loading')
+        setLockout()
+        return
+      }
+      const isNetwork =
+        !navigator.onLine ||
+        error.code === 0 ||
         (typeof error.message === 'string' && /fetch|network|failed/i.test(error.message))
       const left = MAX_ATTEMPTS - failCount
-      showOverlayError(isNetwork
-        ? 'Cannot reach server. If opening via file://, use a local HTTP server instead.'
-        : (error.message || error.type || `Error ${error.code}`) + ` (${left} attempt${left === 1 ? '' : 's'} left)`)
+      showOverlayError(
+        isNetwork
+          ? 'Cannot reach server. If opening via file://, use a local HTTP server instead.'
+          : (error.message || error.type || `Error ${error.code}`) +
+              ` (${left} attempt${left === 1 ? '' : 's'} left)`
+      )
       return
     }
     failCount = 0
-    try { await syncOnLogin() } catch (_) {}
+    try {
+      await syncOnLogin()
+    } catch (_) {}
 
     // Update in-memory user and wire realtime, then navigate
     _user = await getCurrentUser()
     _wireRealtime()
     hideOverlay()
+    document.body.classList.add('auth-passed')
     // Re-render current view now that we're authenticated
     await _renderView(location.hash.slice(1) || '')
   } catch (err) {
     failCount++
-    if (failCount >= MAX_ATTEMPTS) { overlayBtn.classList.remove('loading'); setLockout(); return }
-    showOverlayError(location.protocol === 'file:'
-      ? 'Open via HTTP server, not file://. Run: python3 -m http.server 8080'
-      : err.message || 'Authentication failed.')
+    if (failCount >= MAX_ATTEMPTS) {
+      overlayBtn.classList.remove('loading')
+      setLockout()
+      return
+    }
+    showOverlayError(
+      location.protocol === 'file:'
+        ? 'Open via HTTP server, not file://. Run: python3 -m http.server 8080'
+        : err.message || 'Authentication failed.'
+    )
   } finally {
     if (Date.now() >= lockedUntil) {
       overlayBtn.disabled = false
@@ -138,7 +154,9 @@ async function doOverlaySignIn() {
 
 overlayBtn.addEventListener('click', doOverlaySignIn)
 ;[overlayEmail, overlayPass].forEach(el => {
-  el.addEventListener('keydown', e => { if (e.key === 'Enter') doOverlaySignIn() })
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter') doOverlaySignIn()
+  })
 })
 
 // Sign-out is wired from within nexus view (button is rendered there)
@@ -151,22 +169,25 @@ document.addEventListener('nexus:signout', async () => {
   await signOut()
   _user = null
   showOverlay()
+  document.body.classList.remove('auth-passed')
   await _renderView('')
 })
 
 // ── Realtime subscription ─────────────────────────────────────────────────────
 function _wireRealtime() {
-  if (_realtimeUnsub) return  // already subscribed
-  try { _realtimeUnsub = setupRealtime() } catch (_) {}
+  if (_realtimeUnsub) return // already subscribed
+  try {
+    _realtimeUnsub = setupRealtime()
+  } catch (_) {}
 }
 
 // ── View lifecycle ────────────────────────────────────────────────────────────
 let _destroyCurrent = null
 
 const ROUTES = {
-  '':         () => import('./views/nexus.js'),
-  'vanguard': () => import('./views/vanguard.js'),
-  'mastery':  () => import('./views/mastery.js'),
+  '': () => import('./views/nexus.js'),
+  vanguard: () => import('./views/vanguard.js'),
+  mastery: () => import('./views/mastery.js'),
 }
 const AUTH_ROUTES = new Set(['vanguard', 'mastery'])
 
@@ -175,7 +196,11 @@ async function _renderView(hash) {
   const resolvedHash = ROUTES[hash] ? hash : ''
 
   // Destroy previous view
-  try { _destroyCurrent?.() } catch (err) { console.error('[router] view destroy failed:', err) }
+  try {
+    _destroyCurrent?.()
+  } catch (err) {
+    console.error('[router] view destroy failed:', err)
+  }
   _destroyCurrent = null
 
   activateCSS(resolvedHash === '' ? 'nexus' : resolvedHash)
@@ -201,8 +226,10 @@ async function navigate() {
   if (user) {
     hideOverlay()
     _wireRealtime()
+    document.body.classList.add('auth-passed')
   } else {
     showOverlay()
+    document.body.classList.remove('auth-passed')
   }
 
   await _renderView(hash)

@@ -10,7 +10,8 @@ const STATIC = '__PRECACHE_ASSETS__'
 self.addEventListener('install', e => {
   // skipWaiting inside waitUntil so activation waits for caching to finish
   e.waitUntil(
-    caches.open(CACHE)
+    caches
+      .open(CACHE)
       .then(c => c.addAll(STATIC))
       .then(() => self.skipWaiting())
   )
@@ -18,9 +19,9 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+    caches
+      .keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
   )
   self.clients.claim()
 })
@@ -32,9 +33,7 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached
-      return fetch(e.request).catch(() =>
-        caches.match('./offline.html')
-      )
+      return fetch(e.request).catch(() => caches.match('./offline.html'))
     })
   )
 })

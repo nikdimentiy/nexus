@@ -34,14 +34,14 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       input: {
-        main:    'index.html',
+        main: 'index.html',
         offline: 'offline.html',
       },
     },
   },
   define: {
     __BUILD_DATE__: JSON.stringify(buildDate),
-    __VERSION__:    JSON.stringify(pkg.version),
+    __VERSION__: JSON.stringify(pkg.version),
   },
   plugins: [swBuildDatePlugin(buildDate)],
 })

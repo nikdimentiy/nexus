@@ -6,7 +6,13 @@
     <meta name="theme-color" content="#0f172a" />
     <title>NEXUS · Offline</title>
     <style>
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
       body {
         min-height: 100dvh;
@@ -59,10 +65,17 @@
         font-weight: 600;
         padding: 10px 24px;
         cursor: pointer;
-        transition: background 0.15s, transform 0.15s;
+        transition:
+          background 0.15s,
+          transform 0.15s;
       }
-      button:hover { background: #1d4ed8; transform: translateY(-1px); }
-      button:active { transform: translateY(0); }
+      button:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+      }
+      button:active {
+        transform: translateY(0);
+      }
     </style>
   </head>
   <body>
@@ -70,7 +83,7 @@
       <div class="icon">📡</div>
       <h1>You're offline</h1>
       <p>
-        NEXUS can't reach the network right now.<br>
+        NEXUS can't reach the network right now.<br />
         Cached pages are still available — check back when you're connected.
       </p>
       <button onclick="location.reload()">Try again</button>

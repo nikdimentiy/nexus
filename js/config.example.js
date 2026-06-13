@@ -12,6 +12,6 @@
  *   DATABASE_ID  → Databases > your database > Settings > Database ID
  */
 
-export const APPWRITE_ENDPOINT   = 'https://sfo.cloud.appwrite.io/v1'
+export const APPWRITE_ENDPOINT = 'https://sfo.cloud.appwrite.io/v1'
 export const APPWRITE_PROJECT_ID = 'YOUR_PROJECT_ID_HERE'
 export const APPWRITE_DATABASE_ID = 'YOUR_DATABASE_ID_HERE'
