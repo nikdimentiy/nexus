@@ -126,7 +126,7 @@ const TEMPLATE = /* html */ `
           <div class="week-widget-head" id="week-widget-label">Week</div>
           <div class="week-cells" id="week-cells"></div>
         </div>
-        <button id="btn-toggle-theme" class="btn"><i class="fa-solid fa-moon"></i> Dark</button>
+        <button id="btn-toggle-theme" class="btn"><i class="fa-solid fa-bolt"></i> Cyber</button>
         <button id="btn-show-shortcuts" class="btn" title="Keyboard Shortcuts"><i class="fa-solid fa-keyboard"></i> Shortcuts</button>
         <button id="btn-toggle-widgets" class="btn"><i class="fa-solid fa-eye-slash"></i> Hide</button>
         <a href="#" class="btn" style="text-decoration:none;display:flex;align-items:center;gap:6px;"><i class="fas fa-atom"></i> Nexus</a>
@@ -249,7 +249,7 @@ const TEMPLATE = /* html */ `
           <tr><td>Jump to Today</td><td><span class="kbd-key">T</span></td></tr>
           <tr><td>Previous Cycle</td><td><span class="kbd-key">&larr;</span></td></tr>
           <tr class="kbd-group-last"><td>Next Cycle</td><td><span class="kbd-key">&rarr;</span></td></tr>
-          <tr class="kbd-group-row"><td class="kbd-category" rowspan="4" style="--kbd-accent:var(--cyan)"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Interface</span></td><td>Toggle Dark Mode</td><td><span class="kbd-key">D</span></td></tr>
+          <tr class="kbd-group-row"><td class="kbd-category" rowspan="4" style="--kbd-accent:var(--cyan)"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Interface</span></td><td>Toggle Cyber Mode</td><td><span class="kbd-key">D</span></td></tr>
           <tr><td>Toggle Sidebar</td><td><span class="kbd-key">S</span></td></tr>
           <tr><td>Toggle Widgets</td><td><span class="kbd-key">H</span></td></tr>
           <tr class="kbd-group-last"><td>Show Shortcuts</td><td><span class="kbd-key">?</span></td></tr>
@@ -381,20 +381,19 @@ export async function init(container, user) {
   })
   applyWidgetsState()
 
-  // ── Theme ─────────────────────────────────────────────────────────────────────
+  // ── Theme ───────────────────────────────────────────────────────────────────
   const body = document.body
   const btnToggleTheme = document.getElementById('btn-toggle-theme')
-  let theme = localStorage.getItem('matrix-theme') || 'light'
+  let theme = localStorage.getItem('matrix-theme') || 'dark'
+  if (theme === 'light') theme = 'dark' // migrate any stale light preference
   function applyTheme() {
     body.classList.remove('theme-dark', 'theme-cyber')
-    if (theme === 'dark') {
+    if (theme === 'cyber') {
+      body.classList.add('theme-cyber')
+      btnToggleTheme.innerHTML = '<i class="fa-solid fa-moon"></i> Dark'
+    } else {
       body.classList.add('theme-dark')
       btnToggleTheme.innerHTML = '<i class="fa-solid fa-bolt"></i> Cyber'
-    } else if (theme === 'cyber') {
-      body.classList.add('theme-cyber')
-      btnToggleTheme.innerHTML = '<i class="fa-regular fa-sun"></i> Light'
-    } else {
-      btnToggleTheme.innerHTML = '<i class="fa-solid fa-moon"></i> Dark'
     }
     localStorage.setItem('matrix-theme', theme)
   }
@@ -1786,7 +1785,7 @@ export async function init(container, user) {
     if (e.key === 'ArrowLeft') shiftCycle(-1)
     if (e.key === 'ArrowRight') shiftCycle(1)
     if (e.key === 'd' || e.key === 'D') {
-      theme = theme === 'light' ? 'dark' : theme === 'dark' ? 'cyber' : 'light'
+      theme = theme === 'dark' ? 'cyber' : 'dark'
       applyTheme()
     }
     if (e.key === 's' || e.key === 'S') {
