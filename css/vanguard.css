@@ -245,12 +245,12 @@ body.theme-cyber ::-webkit-scrollbar-thumb:hover {
    ════════════════════════ */
 body.theme-light {
   /* surfaces — warm white paper */
-  --bg-base: #f4f5f7;
+  --bg-base: #ffffff;
   --bg-surface: #ffffff;
   --bg-card: #ffffff;
-  --bg-sidebar: #f0f1f4;
-  --bg-hover: #e8eaf0;
-  --bg-inset: #eceef3;
+  --bg-sidebar: #ffffff;
+  --bg-hover: #f3f4f6;
+  --bg-inset: #ffffff;
 
   /* accent — rich indigo */
   --accent: #4f46e5;
@@ -284,17 +284,17 @@ body.theme-light {
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.14);
 
-  background: #f4f5f7;
+  background: #ffffff;
   color: #111827;
 }
 
 /* ── Light surfaces ── */
 body.theme-light .sidebar {
-  background: #f0f1f4;
+  background: #ffffff;
   border-right-color: rgba(0, 0, 0, 0.1);
 }
 body.theme-light .brand {
-  background: linear-gradient(135deg, #eceef5 0%, #e8eaf2 100%);
+  background: #ffffff;
   border-bottom-color: rgba(0, 0, 0, 0.08);
 }
 body.theme-light .brand-icon {
@@ -308,17 +308,17 @@ body.theme-light .grid-container {
   border-color: rgba(0, 0, 0, 0.07);
 }
 body.theme-light .widget-box {
-  background: #eceef3;
+  background: #ffffff;
   border-color: rgba(0, 0, 0, 0.07);
 }
 body.theme-light .pred-card,
 body.theme-light .si-mini-card,
 body.theme-light .si-mission-card {
-  background: #f8f9fb;
+  background: #ffffff;
   border-color: rgba(0, 0, 0, 0.08);
 }
 body.theme-light .cal-section {
-  background: #f8f9fb;
+  background: #ffffff;
   border-color: rgba(0, 0, 0, 0.06);
 }
 body.theme-light .modal-card {
@@ -408,10 +408,10 @@ body.theme-light .col-today .date-day-name {
   opacity: 0.85;
 }
 body.theme-light thead th {
-  background: rgba(244, 245, 247, 0.95);
+  background: #ffffff;
 }
 body.theme-light thead .th-mission {
-  background: rgba(240, 241, 244, 0.98) !important;
+  background: #ffffff !important;
 }
 
 /* ── Light active / selection states ── */
@@ -437,8 +437,8 @@ body.theme-light .btn-toggle {
   color: #111827;
 }
 body.theme-light .control-group textarea {
-  background: #f8f9fb;
-  border-color: rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.15);
   color: #111827;
 }
 body.theme-light .control-group textarea::placeholder {
@@ -450,12 +450,12 @@ body.theme-light .btn {
   color: #374151;
 }
 body.theme-light .btn:hover {
-  background: #f8f9fb;
+  background: #f3f4f6;
   border-color: rgba(0, 0, 0, 0.22);
   color: #111827;
 }
 body.theme-light .topbar {
-  background: rgba(255,255,255,0.92);
+  background: #ffffff;
   border-bottom-color: rgba(0,0,0,0.07);
 }
 
