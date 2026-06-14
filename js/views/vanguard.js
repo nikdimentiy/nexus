@@ -249,7 +249,7 @@ const TEMPLATE = /* html */ `
           <tr><td>Jump to Today</td><td><span class="kbd-key">T</span></td></tr>
           <tr><td>Previous Cycle</td><td><span class="kbd-key">&larr;</span></td></tr>
           <tr class="kbd-group-last"><td>Next Cycle</td><td><span class="kbd-key">&rarr;</span></td></tr>
-          <tr class="kbd-group-row"><td class="kbd-category" rowspan="4" style="--kbd-accent:var(--cyan)"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Interface</span></td><td>Toggle Cyber Mode</td><td><span class="kbd-key">D</span></td></tr>
+          <tr class="kbd-group-row"><td class="kbd-category" rowspan="4" style="--kbd-accent:var(--cyan)"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Interface</span></td><td>Cycle Theme (Dark → Cyber → Light)</td><td><span class="kbd-key">D</span></td></tr>
           <tr><td>Toggle Sidebar</td><td><span class="kbd-key">S</span></td></tr>
           <tr><td>Toggle Widgets</td><td><span class="kbd-key">H</span></td></tr>
           <tr class="kbd-group-last"><td>Show Shortcuts</td><td><span class="kbd-key">?</span></td></tr>
@@ -385,11 +385,15 @@ export async function init(container, user) {
   const body = document.body
   const btnToggleTheme = document.getElementById('btn-toggle-theme')
   let theme = localStorage.getItem('matrix-theme') || 'dark'
-  if (theme === 'light') theme = 'dark' // migrate any stale light preference
+  // Ensure any saved value is one of the valid three options
+  if (!['dark', 'cyber', 'light'].includes(theme)) theme = 'dark'
   function applyTheme() {
-    body.classList.remove('theme-dark', 'theme-cyber')
+    body.classList.remove('theme-dark', 'theme-cyber', 'theme-light')
     if (theme === 'cyber') {
       body.classList.add('theme-cyber')
+      btnToggleTheme.innerHTML = '<i class="fa-solid fa-sun"></i> Light'
+    } else if (theme === 'light') {
+      body.classList.add('theme-light')
       btnToggleTheme.innerHTML = '<i class="fa-solid fa-moon"></i> Dark'
     } else {
       body.classList.add('theme-dark')

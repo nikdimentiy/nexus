@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════
    VANGUARD  ·  Modern Professional Theme
-   Dark default  ·  Cyber via body.theme-cyber
-   Palette: slate blue · emerald · deep space — no light mode
+   Dark default  ·  Cyber via body.theme-cyber  ·  Light via body.theme-light
+   Palette: slate blue · emerald · deep space · warm white
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* ════════════════════════
@@ -238,6 +238,225 @@ body.theme-cyber ::-webkit-scrollbar-thumb {
 }
 body.theme-cyber ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 200, 255, 0.42);
+}
+
+/* ════════════════════════
+   LIGHT THEME  (warm white · indigo accent)
+   ════════════════════════ */
+body.theme-light {
+  /* surfaces — warm white paper */
+  --bg-base: #f4f5f7;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-sidebar: #f0f1f4;
+  --bg-hover: #e8eaf0;
+  --bg-inset: #eceef3;
+
+  /* accent — rich indigo */
+  --accent: #4f46e5;
+  --accent-dim: #6d64f0;
+  --accent-soft: rgba(79, 70, 229, 0.1);
+
+  /* semantic colours — richer for light bg */
+  --green: #059669;
+  --cyan: #0891b2;
+  --rose: #e11d48;
+  --gold: #d97706;
+  --violet: #7c3aed;
+  --teal: #0d9488;
+  --slate: #475569;
+  --amber: #b45309;
+
+  /* text hierarchy */
+  --text-1: #111827;
+  --text-2: #374151;
+  --text-3: #6b7280;
+  --text-4: #9ca3af;
+
+  /* borders — soft grey */
+  --border-1: rgba(0, 0, 0, 0.07);
+  --border-2: rgba(0, 0, 0, 0.12);
+  --border-3: rgba(0, 0, 0, 0.22);
+
+  /* shadows — lighter for light bg */
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.14);
+
+  background: #f4f5f7;
+  color: #111827;
+}
+
+/* ── Light surfaces ── */
+body.theme-light .sidebar {
+  background: #f0f1f4;
+  border-right-color: rgba(0, 0, 0, 0.1);
+}
+body.theme-light .brand {
+  background: linear-gradient(135deg, #eceef5 0%, #e8eaf2 100%);
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+body.theme-light .brand-icon {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  box-shadow: 0 2px 12px rgba(79, 70, 229, 0.28);
+}
+body.theme-light .calendar-widget,
+body.theme-light .prediction-section,
+body.theme-light .grid-container {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.07);
+}
+body.theme-light .widget-box {
+  background: #eceef3;
+  border-color: rgba(0, 0, 0, 0.07);
+}
+body.theme-light .pred-card,
+body.theme-light .si-mini-card,
+body.theme-light .si-mission-card {
+  background: #f8f9fb;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+body.theme-light .cal-section {
+  background: #f8f9fb;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+body.theme-light .modal-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+body.theme-light .nexus-btn {
+  background: #ffffff;
+  border-color: rgba(79, 70, 229, 0.25);
+  color: #4f46e5;
+}
+body.theme-light .nexus-btn:hover {
+  background: #f0f0ff;
+  border-color: rgba(79, 70, 229, 0.5);
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.14);
+}
+
+/* ── Light accent elements ── */
+body.theme-light .cycle-number-badge {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  box-shadow: 0 1px 10px rgba(79, 70, 229, 0.28);
+}
+body.theme-light .current-date-widget {
+  border-left-color: #059669;
+}
+body.theme-light #year-line-progress {
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+}
+body.theme-light .doy-fill {
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+}
+body.theme-light .doy-num {
+  color: #4f46e5;
+}
+body.theme-light .week-number-badge.current-week {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+/* ── Light: today markers ── */
+body.theme-light .week-cell.today .week-cell-dot {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.32);
+}
+body.theme-light .week-cell.today .week-cell-name {
+  color: #4f46e5;
+}
+body.theme-light .dot-day.today {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+  border-color: #4f46e5 !important;
+  box-shadow: 0 0 8px rgba(79, 70, 229, 0.32);
+}
+body.theme-light .cal-brick.today {
+  background: #4f46e5;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.32);
+}
+body.theme-light .month-brick.today {
+  background: #4f46e5;
+}
+body.theme-light .month-brick.filled {
+  background: rgba(79, 70, 229, 0.22);
+  border-color: transparent;
+}
+
+/* ── Light ring ── */
+body.theme-light .ring-arc {
+  stroke: #4f46e5;
+}
+body.theme-light .ring-trail {
+  stroke: #4f46e5;
+}
+body.theme-light .ring-day-sub {
+  color: #4f46e5;
+}
+
+/* ── Light mission table ── */
+body.theme-light .col-today {
+  background: rgba(79, 70, 229, 0.05) !important;
+}
+body.theme-light .col-today .date-day-num {
+  color: #4f46e5;
+}
+body.theme-light .col-today .date-day-name {
+  color: #4f46e5;
+  opacity: 0.85;
+}
+body.theme-light thead th {
+  background: rgba(244, 245, 247, 0.95);
+}
+body.theme-light thead .th-mission {
+  background: rgba(240, 241, 244, 0.98) !important;
+}
+
+/* ── Light active / selection states ── */
+body.theme-light .cal-section.active-section {
+  border-color: #4f46e5;
+  background: rgba(79, 70, 229, 0.06);
+}
+body.theme-light .cal-section.active-section .cal-section-label {
+  color: #4f46e5;
+}
+body.theme-light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+body.theme-light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+/* ── Light input fields ── */
+body.theme-light .control-group input,
+body.theme-light .btn-toggle {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #111827;
+}
+body.theme-light .control-group textarea {
+  background: #f8f9fb;
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #111827;
+}
+body.theme-light .control-group textarea::placeholder {
+  color: #9ca3af;
+}
+body.theme-light .btn {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #374151;
+}
+body.theme-light .btn:hover {
+  background: #f8f9fb;
+  border-color: rgba(0, 0, 0, 0.22);
+  color: #111827;
+}
+body.theme-light .topbar {
+  background: rgba(255,255,255,0.92);
+  border-bottom-color: rgba(0,0,0,0.07);
 }
 
 /* ════════════════════════
