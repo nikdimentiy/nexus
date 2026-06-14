@@ -386,14 +386,14 @@ export async function init(container, user) {
   const btnToggleTheme = document.getElementById('btn-toggle-theme')
   let theme = localStorage.getItem('matrix-theme') || 'dark'
   // Ensure any saved value is one of the valid three options
-  if (!['dark', 'cyber', 'light'].includes(theme)) theme = 'dark'
+  if (!['dark', 'cyber', 'neon'].includes(theme)) theme = 'dark'
   function applyTheme() {
-    body.classList.remove('theme-dark', 'theme-cyber', 'theme-light')
+    body.classList.remove('theme-dark', 'theme-cyber', 'theme-neon')
     if (theme === 'cyber') {
       body.classList.add('theme-cyber')
-      btnToggleTheme.innerHTML = '<i class="fa-solid fa-sun"></i> Light'
-    } else if (theme === 'light') {
-      body.classList.add('theme-light')
+      btnToggleTheme.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Neon'
+    } else if (theme === 'neon') {
+      body.classList.add('theme-neon')
       btnToggleTheme.innerHTML = '<i class="fa-solid fa-moon"></i> Dark'
     } else {
       body.classList.add('theme-dark')
@@ -402,7 +402,7 @@ export async function init(container, user) {
     localStorage.setItem('matrix-theme', theme)
   }
   btnToggleTheme.addEventListener('click', () => {
-    theme = theme === 'light' ? 'dark' : theme === 'dark' ? 'cyber' : 'light'
+    theme = theme === 'neon' ? 'dark' : theme === 'dark' ? 'cyber' : 'neon'
     applyTheme()
   })
   applyTheme()

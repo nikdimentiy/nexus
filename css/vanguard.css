@@ -241,222 +241,230 @@ body.theme-cyber ::-webkit-scrollbar-thumb:hover {
 }
 
 /* ════════════════════════
-   LIGHT THEME  (warm white · indigo accent)
+   NEON THEME  (deep neon violet · pink & cyan accents)
    ════════════════════════ */
-body.theme-light {
-  /* surfaces — warm white paper */
-  --bg-base: #ffffff;
-  --bg-surface: #ffffff;
-  --bg-card: #ffffff;
-  --bg-sidebar: #ffffff;
-  --bg-hover: #f3f4f6;
-  --bg-inset: #ffffff;
+body.theme-neon {
+  /* surfaces — deep rich neon violet */
+  --bg-base: #0c061a;
+  --bg-surface: #140b2e;
+  --bg-card: #1b0e3d;
+  --bg-sidebar: #090414;
+  --bg-hover: #261454;
+  --bg-inset: #070310;
 
-  /* accent — rich indigo */
-  --accent: #4f46e5;
-  --accent-dim: #6d64f0;
-  --accent-soft: rgba(79, 70, 229, 0.1);
+  /* accent — neon pink */
+  --accent: #ff007f;
+  --accent-dim: #e00070;
+  --accent-soft: rgba(255, 0, 127, 0.15);
 
-  /* semantic colours — richer for light bg */
-  --green: #059669;
-  --cyan: #0891b2;
-  --rose: #e11d48;
-  --gold: #d97706;
-  --violet: #7c3aed;
-  --teal: #0d9488;
-  --slate: #475569;
-  --amber: #b45309;
+  /* semantic colours — vibrant neon states */
+  --green: #39ff14;
+  --cyan: #00f3ff;
+  --rose: #ff0055;
+  --gold: #ffaa00;
+  --violet: #b026ff;
+  --teal: #00ffd2;
+  --slate: #70658a;
+  --amber: #ff5500;
 
   /* text hierarchy */
-  --text-1: #111827;
-  --text-2: #374151;
-  --text-3: #6b7280;
-  --text-4: #9ca3af;
+  --text-1: #ffffff;
+  --text-2: #e2d9ff;
+  --text-3: #9a8bbd;
+  --text-4: #5d507d;
 
-  /* borders — soft grey */
-  --border-1: rgba(0, 0, 0, 0.07);
-  --border-2: rgba(0, 0, 0, 0.12);
-  --border-3: rgba(0, 0, 0, 0.22);
+  /* borders — glowing neon pink/cyan */
+  --border-1: rgba(255, 0, 127, 0.15);
+  --border-2: rgba(0, 243, 255, 0.2);
+  --border-3: rgba(255, 0, 127, 0.4);
 
-  /* shadows — lighter for light bg */
-  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.14);
+  /* shadows — neon glows */
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 8px rgba(255, 0, 127, 0.15);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 16px rgba(0, 243, 255, 0.18);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 32px rgba(255, 0, 127, 0.25);
 
-  background: #ffffff;
-  color: #111827;
-}
-
-/* ── Light surfaces ── */
-body.theme-light .sidebar {
-  background: #ffffff;
-  border-right-color: rgba(0, 0, 0, 0.1);
-}
-body.theme-light .brand {
-  background: #ffffff;
-  border-bottom-color: rgba(0, 0, 0, 0.08);
-}
-body.theme-light .brand-icon {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
-  box-shadow: 0 2px 12px rgba(79, 70, 229, 0.28);
-}
-body.theme-light .calendar-widget,
-body.theme-light .prediction-section,
-body.theme-light .grid-container {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.07);
-}
-body.theme-light .widget-box {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.07);
-}
-body.theme-light .pred-card,
-body.theme-light .si-mini-card,
-body.theme-light .si-mission-card {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.08);
-}
-body.theme-light .cal-section {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.06);
-}
-body.theme-light .modal-card {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.1);
-}
-body.theme-light .nexus-btn {
-  background: #ffffff;
-  border-color: rgba(79, 70, 229, 0.25);
-  color: #4f46e5;
-}
-body.theme-light .nexus-btn:hover {
-  background: #f0f0ff;
-  border-color: rgba(79, 70, 229, 0.5);
-  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.14);
+  background: radial-gradient(ellipse at 20% 0%, rgba(255, 0, 127, 0.18) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(176, 38, 255, 0.15) 0%, transparent 50%), #0c061a;
+  color: #ffffff;
 }
 
-/* ── Light accent elements ── */
-body.theme-light .cycle-number-badge {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
-  box-shadow: 0 1px 10px rgba(79, 70, 229, 0.28);
+/* ── Neon surfaces ── */
+body.theme-neon .sidebar {
+  background: #090414;
+  border-right-color: rgba(255, 0, 127, 0.2);
 }
-body.theme-light .current-date-widget {
-  border-left-color: #059669;
+body.theme-neon .brand {
+  background: linear-gradient(135deg, #140b2e 0%, #090414 100%);
+  border-bottom-color: rgba(255, 0, 127, 0.25);
 }
-body.theme-light #year-line-progress {
-  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+body.theme-neon .brand-icon {
+  background: linear-gradient(135deg, #ff007f, #b026ff);
+  box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
 }
-body.theme-light .doy-fill {
-  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+body.theme-neon .calendar-widget,
+body.theme-neon .prediction-section,
+body.theme-neon .grid-container {
+  background: #140b2e;
+  border-color: rgba(255, 0, 127, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 0, 127, 0.08);
 }
-body.theme-light .doy-num {
-  color: #4f46e5;
+body.theme-neon .widget-box {
+  background: #1b0e3d;
+  border-color: rgba(0, 243, 255, 0.25);
 }
-body.theme-light .week-number-badge.current-week {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+body.theme-neon .pred-card,
+body.theme-neon .si-mini-card,
+body.theme-neon .si-mission-card {
+  background: #1b0e3d;
+  border-color: rgba(255, 0, 127, 0.18);
+}
+body.theme-neon .cal-section {
+  background: #1b0e3d;
+  border-color: rgba(255, 0, 127, 0.15);
+}
+body.theme-neon .modal-card {
+  background: #140b2e;
+  border-color: rgba(255, 0, 127, 0.3);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.8), 0 0 30px rgba(255,0,127,0.25);
+}
+body.theme-neon .nexus-btn {
+  background: #140b2e;
+  border-color: rgba(255, 0, 127, 0.4);
+  color: #ff007f;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 10px rgba(255, 0, 127, 0.2);
+}
+body.theme-neon .nexus-btn:hover {
+  background: #ff007f;
+  border-color: #ff007f;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(255, 0, 127, 0.5), 0 0 20px rgba(255, 0, 127, 0.4);
 }
 
-/* ── Light: today markers ── */
-body.theme-light .week-cell.today .week-cell-dot {
-  background: #4f46e5;
-  border-color: #4f46e5;
+/* ── Neon accent elements ── */
+body.theme-neon .cycle-number-badge {
+  background: linear-gradient(135deg, #ff007f, #b026ff);
+  box-shadow: 0 0 12px rgba(255, 0, 127, 0.4);
+}
+body.theme-neon .current-date-widget {
+  border-left-color: #39ff14;
+}
+body.theme-neon #year-line-progress {
+  background: linear-gradient(90deg, #ff007f, #b026ff);
+}
+body.theme-neon .doy-fill {
+  background: linear-gradient(90deg, #ff007f, #b026ff);
+}
+body.theme-neon .doy-num {
+  color: #ff007f;
+}
+body.theme-neon .week-number-badge.current-week {
+  background: linear-gradient(135deg, #ff007f, #b026ff);
+}
+
+/* ── Neon: today markers ── */
+body.theme-neon .week-cell.today .week-cell-dot {
+  background: #ff007f;
+  border-color: #ff007f;
   color: #fff;
-  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.32);
+  box-shadow: 0 0 12px rgba(255, 0, 127, 0.6);
 }
-body.theme-light .week-cell.today .week-cell-name {
-  color: #4f46e5;
+body.theme-neon .week-cell.today .week-cell-name {
+  color: #ff007f;
 }
-body.theme-light .dot-day.today {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
-  border-color: #4f46e5 !important;
-  box-shadow: 0 0 8px rgba(79, 70, 229, 0.32);
+body.theme-neon .dot-day.today {
+  background: linear-gradient(135deg, #ff007f, #b026ff) !important;
+  border-color: #ff007f !important;
+  box-shadow: 0 0 12px rgba(255, 0, 127, 0.6);
 }
-body.theme-light .cal-brick.today {
-  background: #4f46e5;
+body.theme-neon .cal-brick.today {
+  background: #ff007f;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.32);
+  box-shadow: 0 0 12px rgba(255, 0, 127, 0.6);
 }
-body.theme-light .month-brick.today {
-  background: #4f46e5;
+body.theme-neon .month-brick.today {
+  background: #ff007f;
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
 }
-body.theme-light .month-brick.filled {
-  background: rgba(79, 70, 229, 0.22);
+body.theme-neon .month-brick.filled {
+  background: rgba(255, 0, 127, 0.35);
   border-color: transparent;
 }
 
-/* ── Light ring ── */
-body.theme-light .ring-arc {
-  stroke: #4f46e5;
+/* ── Neon ring ── */
+body.theme-neon .ring-arc {
+  stroke: #ff007f;
 }
-body.theme-light .ring-trail {
-  stroke: #4f46e5;
+body.theme-neon .ring-trail {
+  stroke: rgba(255, 0, 127, 0.2);
 }
-body.theme-light .ring-day-sub {
-  color: #4f46e5;
-}
-
-/* ── Light mission table ── */
-body.theme-light .col-today {
-  background: rgba(79, 70, 229, 0.05) !important;
-}
-body.theme-light .col-today .date-day-num {
-  color: #4f46e5;
-}
-body.theme-light .col-today .date-day-name {
-  color: #4f46e5;
-  opacity: 0.85;
-}
-body.theme-light thead th {
-  background: #ffffff;
-}
-body.theme-light thead .th-mission {
-  background: #ffffff !important;
+body.theme-neon .ring-day-sub {
+  color: #ff007f;
 }
 
-/* ── Light active / selection states ── */
-body.theme-light .cal-section.active-section {
-  border-color: #4f46e5;
-  background: rgba(79, 70, 229, 0.06);
+/* ── Neon mission table ── */
+body.theme-neon .col-today {
+  background: rgba(255, 0, 127, 0.08) !important;
 }
-body.theme-light .cal-section.active-section .cal-section-label {
-  color: #4f46e5;
+body.theme-neon .col-today .date-day-num {
+  color: #ff007f;
 }
-body.theme-light ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
+body.theme-neon .col-today .date-day-name {
+  color: #ff007f;
+  opacity: 0.95;
 }
-body.theme-light ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.28);
+body.theme-neon thead th {
+  background: #090414;
+}
+body.theme-neon thead .th-mission {
+  background: #140b2e !important;
+  border-right-color: rgba(255, 0, 127, 0.3) !important;
 }
 
-/* ── Light input fields ── */
-body.theme-light .control-group input,
-body.theme-light .btn-toggle {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.15);
-  color: #111827;
+/* ── Neon active / selection states ── */
+body.theme-neon .cal-section.active-section {
+  border-color: #ff007f;
+  background: rgba(255, 0, 127, 0.08);
 }
-body.theme-light .control-group textarea {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.15);
-  color: #111827;
+body.theme-neon .cal-section.active-section .cal-section-label {
+  color: #ff007f;
 }
-body.theme-light .control-group textarea::placeholder {
-  color: #9ca3af;
+body.theme-neon ::-webkit-scrollbar-thumb {
+  background: rgba(255, 0, 127, 0.25);
 }
-body.theme-light .btn {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.12);
-  color: #374151;
+body.theme-neon ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 0, 127, 0.5);
 }
-body.theme-light .btn:hover {
-  background: #f3f4f6;
-  border-color: rgba(0, 0, 0, 0.22);
-  color: #111827;
+
+/* ── Neon input fields ── */
+body.theme-neon .control-group input,
+body.theme-neon .btn-toggle {
+  background: #1b0e3d;
+  border-color: rgba(255, 0, 127, 0.25);
+  color: #ffffff;
 }
-body.theme-light .topbar {
-  background: #ffffff;
-  border-bottom-color: rgba(0,0,0,0.07);
+body.theme-neon .control-group textarea {
+  background: #140b2e;
+  border-color: rgba(255, 0, 127, 0.25);
+  color: #ffffff;
+}
+body.theme-neon .control-group textarea::placeholder {
+  color: #70658a;
+}
+body.theme-neon .btn {
+  background: #140b2e;
+  border-color: rgba(255, 0, 127, 0.3);
+  color: #e2d9ff;
+}
+body.theme-neon .btn:hover {
+  background: #261454;
+  border-color: #ff007f;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.3);
+}
+body.theme-neon .topbar {
+  background: rgba(12, 6, 26, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom-color: rgba(255, 0, 127, 0.15);
 }
 
 /* ════════════════════════
